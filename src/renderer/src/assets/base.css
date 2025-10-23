@@ -6,50 +6,50 @@
 [data-theme='flexokilight'],
 :root:has(input.theme-controller[value='flexokilight']:checked) {
   color-scheme: light;
-  --color-base-100: #FFFCF0;
-  --color-base-200: #F2F0E5;
-  --color-base-300: #E6E4D9;
-  --color-base-content: #100F0F;
-  --color-primary: #205EA6;
-  --color-primary-content: #FFFCF0;
-  --color-secondary: #5E409D;
-  --color-secondary-content: #FFFCF0;
-  --color-accent: #24837B;
-  --color-accent-content: #FFFCF0;
-  --color-neutral: #6F6E69;
-  --color-neutral-content: #E6E4D9;
-  --color-info: #205EA6;
-  --color-info-content: #FFFCF0;
-  --color-success: #66800B;
-  --color-success-content: #FFFCF0;
-  --color-warning: #AD8301;
-  --color-warning-content: #100F0F;
-  --color-error: #AF3029;
-  --color-error-content: #FFFCF0;
+  --color-base-100: #fffcf0;
+  --color-base-200: #f2f0e5;
+  --color-base-300: #e6e4d9;
+  --color-base-content: #100f0f;
+  --color-primary: #205ea6;
+  --color-primary-content: #fffcf0;
+  --color-secondary: #5e409d;
+  --color-secondary-content: #fffcf0;
+  --color-accent: #24837b;
+  --color-accent-content: #fffcf0;
+  --color-neutral: #6f6e69;
+  --color-neutral-content: #e6e4d9;
+  --color-info: #205ea6;
+  --color-info-content: #fffcf0;
+  --color-success: #66800b;
+  --color-success-content: #fffcf0;
+  --color-warning: #ad8301;
+  --color-warning-content: #100f0f;
+  --color-error: #af3029;
+  --color-error-content: #fffcf0;
 }
 
 /* Flexoki Dark Theme */
 [data-theme='flexokidark'],
 :root:has(input.theme-controller[value='flexokidark']:checked) {
   color-scheme: dark;
-  --color-base-100: #100F0F;
-  --color-base-200: #1C1B1A;
+  --color-base-100: #100f0f;
+  --color-base-200: #1c1b1a;
   --color-base-300: #282726;
-  --color-base-content: #E6E4D9;
-  --color-primary: #4385BE;
-  --color-primary-content: #100F0F;
-  --color-secondary: #8B7EC8;
-  --color-secondary-content: #100F0F;
-  --color-accent: #3AA99F;
-  --color-accent-content: #100F0F;
+  --color-base-content: #e6e4d9;
+  --color-primary: #4385be;
+  --color-primary-content: #100f0f;
+  --color-secondary: #8b7ec8;
+  --color-secondary-content: #100f0f;
+  --color-accent: #3aa99f;
+  --color-accent-content: #100f0f;
   --color-neutral: #878580;
-  --color-neutral-content: #E6E4D9;
-  --color-info: #4385BE;
-  --color-info-content: #100F0F;
-  --color-success: #879A39;
-  --color-success-content: #100F0F;
-  --color-warning: #D0A215;
-  --color-warning-content: #100F0F;
-  --color-error: #D14D41;
-  --color-error-content: #100F0F;
+  --color-neutral-content: #e6e4d9;
+  --color-info: #4385be;
+  --color-info-content: #100f0f;
+  --color-success: #879a39;
+  --color-success-content: #100f0f;
+  --color-warning: #d0a215;
+  --color-warning-content: #100f0f;
+  --color-error: #d14d41;
+  --color-error-content: #100f0f;
 }

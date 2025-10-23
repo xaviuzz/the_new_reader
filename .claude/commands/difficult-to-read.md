@@ -1,6 +1,7 @@
-this is difficult to read suggest me alternatives 
+this is difficult to read suggest me alternatives
 
 ## Best practices
+
 - Legilibility over compact
-- Introduce explaining variables 
-- Avoid cleverness 
+- Introduce explaining variables
+- Avoid cleverness

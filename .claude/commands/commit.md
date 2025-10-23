@@ -5,16 +5,18 @@ Create well-formatted commits with conventional commit messages and emojis.
 ## 🚨 CRITICAL REQUIREMENTS
 
 **MANDATORY COMMIT FORMAT:**
+
 - **ONE LINE ONLY** - Never use multi-line commit messages
 - **NO ATTRIBUTION** - Never add "Generated with Claude Code" or co-authoring credits
 - **NO FOOTERS** - No additional metadata or acknowledgments
 - **CLEAN FORMAT** - Just the conventional commit message with emoji
 
 **Example:**
+
 ```
 ✅ CORRECT: ♻️ refactor: improve code readability with explaining variables
 ❌ WRONG:   ♻️ refactor: improve code readability
-            
+
             🔧 Generated with [Claude Code](https://claude.ai/code)
             Co-Authored-By: Claude <noreply@anthropic.com>
 ```
