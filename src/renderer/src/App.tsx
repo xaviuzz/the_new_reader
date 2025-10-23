@@ -1,10 +1,8 @@
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 
 function App(): React.JSX.Element {
-
   return (
     <div className="min-h-screen bg-base-100 text-base-content transition-colors duration-200">
-      {/* Theme Switcher */}
       <div className="fixed top-4 right-4">
         <ThemeSwitcher />
       </div>
@@ -12,6 +10,7 @@ function App(): React.JSX.Element {
       <div className="p-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Welcome to The New Reader</h1>
+          
           <p className="text-base-content/70 mb-8">Powered by Flexoki theme</p>
 
           <div className="card bg-base-200 shadow-xl mb-6">
