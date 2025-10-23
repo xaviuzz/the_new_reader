@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Flexoki Light Theme */
+[data-theme='flexokilight'],
+:root:has(input.theme-controller[value='flexokilight']:checked) {
+  color-scheme: light;
+  --color-base-100: #FFFCF0;
+  --color-base-200: #F2F0E5;
+  --color-base-300: #E6E4D9;
+  --color-base-content: #100F0F;
+  --color-primary: #205EA6;
+  --color-primary-content: #FFFCF0;
+  --color-secondary: #5E409D;
+  --color-secondary-content: #FFFCF0;
+  --color-accent: #24837B;
+  --color-accent-content: #FFFCF0;
+  --color-neutral: #6F6E69;
+  --color-neutral-content: #E6E4D9;
+  --color-info: #205EA6;
+  --color-info-content: #FFFCF0;
+  --color-success: #66800B;
+  --color-success-content: #FFFCF0;
+  --color-warning: #AD8301;
+  --color-warning-content: #100F0F;
+  --color-error: #AF3029;
+  --color-error-content: #FFFCF0;
+}
+
+/* Flexoki Dark Theme */
+[data-theme='flexokidark'],
+:root:has(input.theme-controller[value='flexokidark']:checked) {
+  color-scheme: dark;
+  --color-base-100: #100F0F;
+  --color-base-200: #1C1B1A;
+  --color-base-300: #282726;
+  --color-base-content: #E6E4D9;
+  --color-primary: #4385BE;
+  --color-primary-content: #100F0F;
+  --color-secondary: #8B7EC8;
+  --color-secondary-content: #100F0F;
+  --color-accent: #3AA99F;
+  --color-accent-content: #100F0F;
+  --color-neutral: #878580;
+  --color-neutral-content: #E6E4D9;
+  --color-info: #4385BE;
+  --color-info-content: #100F0F;
+  --color-success: #879A39;
+  --color-success-content: #100F0F;
+  --color-warning: #D0A215;
+  --color-warning-content: #100F0F;
+  --color-error: #D14D41;
+  --color-error-content: #100F0F;
+}
