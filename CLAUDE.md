@@ -9,6 +9,45 @@ You must use VScode tools whenever posible as described in .claude/vscode.md
 - Example: ❌ "Should I update this file?" → ✅ Just update it and report what was done.
 - This keeps interactions efficient and focused on delivering results.
 
+### Git Commits
+
+- **Single-line conventional commits** - All commits must be one line only
+- **Format**: `emoji type: description` (e.g., `♻️ refactor: extract theme switcher into reusable component`)
+- **No footers** - Do NOT add "Generated with Claude Code", co-authoring credits, or multi-line messages
+- **Types with emojis**:
+  - ✨ feat: New features
+  - 🐛 fix: Bug fixes
+  - 📝 docs: Documentation changes
+  - ♻️ refactor: Code restructuring
+  - 🎨 style: Code formatting
+  - ⚡️ perf: Performance improvements
+  - ✅ test: Tests
+  - 🧑‍💻 chore: Tooling/maintenance
+  - 🔒 security: Security improvements
+
+### Planning Complex Features
+
+When planning new features or large changes:
+
+1. **Ask clarifying questions systematically** before creating a plan
+   - Ask about storage mechanisms, data persistence
+   - Ask about backend vs frontend processing
+   - Ask about UI/UX patterns and layouts
+   - Ask about what data to display and validation requirements
+   - Get ALL clarifications before proceeding to plan
+
+2. **Create incremental, iterative plans** that are:
+   - **Independently testable** - Each step has clear testing criteria
+   - **Building on previous steps** - Later steps depend on earlier work
+   - **Persisted in `.claude/` folder** - Save plans as markdown files (e.g., `stage-one.md`, `feature-x.md`)
+   - **Detailed with test criteria** - Each step specifies what to test and how to validate
+
+3. **Structure plans for step-by-step implementation**
+   - Break complex features into manageable phases
+   - Each phase contains numbered steps with specific deliverables
+   - Include testing checklist at the end
+   - Example: Phase 1 (Setup) → Phase 2 (Backend) → Phase 3 (Frontend) → Phase 4+ (Features)
+
 ## React Component Patterns
 
 ### Component State Encapsulation
