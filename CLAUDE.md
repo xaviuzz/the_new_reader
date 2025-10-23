@@ -1,17 +1,66 @@
 We are going to build an electron application call The new reader
 
 ## Development Guidelines
-
-### Tool Usage
-
-- **Use VS Code MCP tools confidently** - Don't ask for permission to use `mcp__vscode-mcp-server__*` tools. They are available and designed for this environment. Use them directly when appropriate for file operations, code analysis, and terminal commands.
-- Refer to [.claude/vscode.md](.claude/vscode.md) for detailed VS Code tool usage patterns and when to prioritize IDE tools over manual commands.
+You must use VScode tools whenever posible as described in .claude/vscode.md
 
 ### Communication Style
 
 - **No permission-seeking** - Don't ask for validation before executing work. Execute directly and report results.
 - Example: ❌ "Should I update this file?" → ✅ Just update it and report what was done.
 - This keeps interactions efficient and focused on delivering results.
+
+## React Component Patterns
+
+### Component State Encapsulation
+
+When extracting UI features into React components, encapsulate state management within the component itself:
+
+- **Internal state management** - Components should manage their own state and side effects (e.g., `ThemeSwitcher` manages theme state internally and applies `data-theme` to the document)
+- **Optional callbacks** - Export interfaces with optional callback props to allow parent customization without tight coupling
+- **Benefits** - Parent components remain minimal and focused, components are reusable, state is co-located with the logic that uses it
+
+Example: `ThemeSwitcher` component manages theme state internally with optional `onThemeChange` callback:
+
+```tsx
+export interface ThemeSwitcherProps {
+  onThemeChange?: (theme: Theme) => void
+}
+
+export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.Element {
+  const [theme, setTheme] = useState<Theme>('flexokilight')
+  
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    onThemeChange?.(theme)
+  }, [theme, onThemeChange])
+  
+  const toggleTheme = (): void => {
+    setTheme((currentTheme) => (currentTheme === 'flexokilight' ? 'flexokidark' : 'flexokilight'))
+  }
+  
+  return (
+    <button onClick={toggleTheme} className="btn btn-sm btn-ghost gap-2">
+      {theme === 'flexokilight' ? '🌙' : '☀️'}
+    </button>
+  )
+}
+```
+
+## File Operations Best Practices
+
+### Precise Content Matching for Edit Operations
+
+When using `replace_lines_code` tool, ensure exact content matching to avoid validation failures:
+
+- **Read with exact line ranges** - When content validation fails, use targeted `read_file_code` calls with specific line ranges to get precise content
+- **Account for whitespace** - Line content includes all leading/trailing whitespace exactly as it appears in the file
+- **Smaller ranges** - Use smaller line ranges to avoid confusion with formatting differences and ensure accurate matching
+
+Example: If `replace_lines_code` fails, read the specific lines first:
+```
+read_file_code with startLine: 8, endLine: 16
+→ Use the exact output as originalCode parameter
+```
 
 ## CSS Framework Integration: DaisyUI + Tailwind CSS
 

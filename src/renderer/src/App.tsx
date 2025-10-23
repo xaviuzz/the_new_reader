@@ -1,28 +1,12 @@
-import { useEffect, useState } from 'react'
+import { ThemeSwitcher } from './components/ThemeSwitcher'
 
 function App(): React.JSX.Element {
-  const [theme, setTheme] = useState<'flexokilight' | 'flexokidark'>('flexokilight')
-
-  useEffect(() => {
-    // Apply theme to document
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
-
-  const toggleTheme = (): void => {
-    setTheme(theme === 'flexokilight' ? 'flexokidark' : 'flexokilight')
-  }
 
   return (
     <div className="min-h-screen bg-base-100 text-base-content transition-colors duration-200">
       {/* Theme Switcher */}
       <div className="fixed top-4 right-4">
-        <button
-          onClick={toggleTheme}
-          className="btn btn-sm btn-ghost gap-2"
-          title={`Switch to ${theme === 'flexokilight' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'flexokilight' ? '🌙' : '☀️'}
-        </button>
+        <ThemeSwitcher />
       </div>
 
       <div className="p-8">
