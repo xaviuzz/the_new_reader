@@ -30,17 +30,19 @@ You must use VScode tools whenever posible as described in .claude/vscode.md
 When planning new features or large changes:
 
 1. **Ask clarifying questions systematically** before creating a plan
-   - Ask about storage mechanisms, data persistence
+   - Ask about storage mechanisms, data persistence, library preferences
    - Ask about backend vs frontend processing
    - Ask about UI/UX patterns and layouts
    - Ask about what data to display and validation requirements
-   - Get ALL clarifications before proceeding to plan
+   - Ask about execution scope ("no more code than needed")
+   - Get ALL clarifications before proceeding to plan (prevents rework)
 
 2. **Create incremental, iterative plans** that are:
    - **Independently testable** - Each step has clear testing criteria
    - **Building on previous steps** - Later steps depend on earlier work
    - **Persisted in `.claude/` folder** - Save plans as markdown files (e.g., `stage-one.md`, `feature-x.md`)
    - **Detailed with test criteria** - Each step specifies what to test and how to validate
+   - **Minimal scope** - Only add code when a phase requires it, never preemptively
 
 3. **Structure plans for step-by-step implementation**
    - Break complex features into manageable phases
@@ -84,6 +86,28 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
   )
 }
 ```
+
+## The New Reader - RSS Feed Application
+
+### Architecture & Dependencies
+
+**Storage**: OPML file format stored in Electron's user data directory (`app.getPath('userData')`)
+
+**Core Libraries**:
+- `rss-parser` (v3.13.0) - Parses RSS and Atom feeds with built-in TypeScript support
+- `opml-generator` (v1.1.1) - Generates OPML files for feed storage
+- Node.js built-in `fs` module for file operations (no external file utils needed)
+
+**Key Design Decisions**:
+- Use Node.js built-in `fs` module instead of `fs-extra`
+- Parse feeds in the main process (backend)
+- Store all feeds in a single OPML file in userData directory
+- Support both RSS and Atom feed formats
+
+**TypeScript Type Definitions**:
+- `@types/rss-parser` doesn't exist on npm, but rss-parser has built-in TS support
+- `opml-parser` doesn't exist on npm; use `opml-generator` for writing OPML only
+- Define custom types for OPML reading as needed
 
 ## File Operations Best Practices
 
