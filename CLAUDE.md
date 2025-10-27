@@ -116,6 +116,65 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
 }
 ```
 
+## Service Architecture Patterns
+
+### Class-Based Services for Stateful Operations
+
+When a service requires the same configuration parameter (like a file path) across multiple method calls, use a class-based pattern instead of standalone functions to eliminate parameter duplication:
+
+**Convert from function-based to class-based when:**
+- Multiple functions share the same required parameter
+- The parameter represents service state that's accessed repeatedly
+- You want to simplify the API at call sites
+
+**Example - OPML Service Refactor:**
+
+Instead of:
+```typescript
+addFeed(testFilePath, feed)
+readOpmlFile(testFilePath)
+writeOpmlFile(testFilePath, feeds)
+```
+
+Use:
+```typescript
+const opmlService = new OpmlService(testFilePath)
+opmlService.addFeed(feed)
+opmlService.readOpmlFile()
+opmlService.writeOpmlFile(feeds)
+```
+
+**Benefits:**
+- Eliminates parameter duplication at call sites
+- Encapsulates configuration state (file path) within the service instance
+- Cleaner, more intuitive API
+- Easier to test with different configurations (create new instance per test)
+- Foundation for adding shared state in the future
+
+### Private Helper Methods in Services
+
+Keep internal helper methods private; only expose the public API that consumers should use.
+
+**Benefits:**
+- Hides implementation details (e.g., OPML parsing internals)
+- Reduces cognitive load on API users
+- Allows internal refactoring without breaking external code
+- Clear separation between public contract and private implementation
+
+**Example:**
+```typescript
+export class OpmlService {
+  private parseOpmlSync(xmlContent: string): OpmlStructure { ... }
+  private stringifyOpmlSync(opmlObject: OpmlStructure): string { ... }
+
+  // Public API only
+  readOpmlFile(): Feed[] { ... }
+  writeOpmlFile(feeds: Feed[]): void { ... }
+  addFeed(feed: Feed): void { ... }
+  getFeeds(): Feed[] { ... }
+}
+```
+
 ## The New Reader - RSS Feed Application
 
 ### Architecture & Dependencies
