@@ -1,21 +1,45 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { Feed } from '../types'
-import opml from 'opml-generator'
+import * as opml from 'opml'
 
-interface OpmlOutline {
-  text: string
-  title?: string
-  type: string
-  xmlUrl: string
-  htmlUrl?: string
+interface OpmlStructure {
+  opml: {
+    head?: {
+      title?: string
+      dateCreated?: string
+      ownerName?: string
+    }
+    body?: {
+      subs?: Array<{
+        text?: string
+        title?: string
+        type?: string
+        xmlUrl?: string
+        htmlUrl?: string
+      }>
+    }
+  }
 }
 
-interface OpmlData {
-  title: string
-  dateCreated: Date
-  ownerName?: string
-  feeds: OpmlOutline[]
+function parseOpmlSync(xmlContent: string): OpmlStructure {
+  let result: OpmlStructure | undefined
+  let error: Error | null = null
+
+  opml.parse(xmlContent, (err, parsed) => {
+    error = err
+    result = parsed
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return result as OpmlStructure
+}
+
+function stringifyOpmlSync(opmlObject: OpmlStructure): string {
+  return (opml.stringify as unknown as (obj: OpmlStructure) => string)(opmlObject)
 }
 
 export function getOpmlFilePath(baseDir: string): string {
@@ -30,52 +54,51 @@ export function readOpmlFile(filePath: string): Feed[] {
   const xmlContent = fs.readFileSync(filePath, 'utf-8')
   const feeds: Feed[] = []
 
-  const outlinePattern = /<outline[^>]*xmlUrl="([^"]+)"[^>]*>/g
-  let match: RegExpExecArray | null
+  try {
+    const result = parseOpmlSync(xmlContent)
+    const outlines = result.opml?.body?.subs || []
 
-  while ((match = outlinePattern.exec(xmlContent)) !== null) {
-    const outlineTag = match[0]
-    const feedUrl = match[1]
-
-    const titleMatch = /title="([^"]+)"/.exec(outlineTag)
-    const textMatch = /text="([^"]+)"/.exec(outlineTag)
-    const title = titleMatch ? titleMatch[1] : textMatch ? textMatch[1] : feedUrl
-
-    feeds.push({ title, feedUrl })
+    for (const outline of outlines) {
+      if (outline.xmlUrl) {
+        feeds.push({
+          title: outline.title || outline.text || outline.xmlUrl,
+          feedUrl: outline.xmlUrl
+        })
+      }
+    }
+  } catch {
+    return []
   }
 
   return feeds
 }
 
 export function writeOpmlFile(filePath: string, feeds: Feed[]): void {
-  const opmlData: OpmlData = {
-    title: 'The New Reader Feeds',
-    dateCreated: new Date(),
-    ownerName: 'The New Reader',
-    feeds: feeds.map((feed) => ({
-      text: feed.title,
-      title: feed.title,
-      type: 'rss',
-      xmlUrl: feed.feedUrl,
-      htmlUrl: feed.feedUrl
-    }))
+  const opmlStructure = {
+    opml: {
+      head: {
+        title: 'The New Reader Feeds',
+        dateCreated: new Date().toUTCString(),
+        ownerName: 'The New Reader'
+      },
+      body: {
+        subs: feeds.map((feed) => ({
+          text: feed.title,
+          title: feed.title,
+          type: 'rss',
+          xmlUrl: feed.feedUrl,
+          htmlUrl: feed.feedUrl
+        }))
+      }
+    }
   }
-
-  const header = {
-    title: opmlData.title,
-    dateCreated: opmlData.dateCreated,
-    ownerName: opmlData.ownerName
-  }
-
-  const outlines = opmlData.feeds
-
-  const xmlOutput = opml(header, outlines)
 
   const dir = path.dirname(filePath)
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
 
+  const xmlOutput = stringifyOpmlSync(opmlStructure)
   fs.writeFileSync(filePath, xmlOutput, 'utf-8')
 }
 

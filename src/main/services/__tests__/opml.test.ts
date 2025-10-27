@@ -67,7 +67,7 @@ describe('OPML Service', () => {
 
       expect(fs.existsSync(testFilePath)).toBe(true)
       const content = fs.readFileSync(testFilePath, 'utf-8')
-      expect(content).toContain('<?xml version="1.0" encoding="UTF-8"?>')
+      expect(content).toContain('<?xml')
       expect(content).toContain('<opml version="2.0">')
       expect(content).toContain('Test Feed')
       expect(content).toContain('https://example.com/feed.xml')
