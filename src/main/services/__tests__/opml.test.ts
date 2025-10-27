@@ -2,22 +2,22 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { getOpmlFilePath, readOpmlFile, writeOpmlFile, addFeed, getFeeds } from '../opml'
+import { getOpmlFilePath, OpmlService } from '../opml'
 import { Feed } from '../../types'
 import { FeedAlreadyExistsError } from '../../types/errors'
 
 describe('OPML Service', () => {
   let testDir: string
   let testFilePath: string
+  let opmlService: OpmlService
 
   beforeEach(() => {
-    // Create a temporary directory for each test
     testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'opml-test-'))
     testFilePath = path.join(testDir, 'feeds.opml')
+    opmlService = new OpmlService(testFilePath)
   })
 
   afterEach(() => {
-    // Clean up temporary directory
     if (fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true, force: true })
     }
@@ -37,7 +37,7 @@ describe('OPML Service', () => {
 
   describe('readOpmlFile', () => {
     it('should return empty array when file does not exist', () => {
-      const result = readOpmlFile(testFilePath)
+      const result = opmlService.readOpmlFile()
       expect(result).toEqual([])
     })
 
@@ -47,8 +47,8 @@ describe('OPML Service', () => {
         { title: 'NY Times', feedUrl: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' }
       ]
 
-      writeOpmlFile(testFilePath, feeds)
-      const result = readOpmlFile(testFilePath)
+      opmlService.writeOpmlFile(feeds)
+      const result = opmlService.readOpmlFile()
 
       expect(result).toHaveLength(2)
       expect(result[0].title).toBe('BBC News')
@@ -64,7 +64,7 @@ describe('OPML Service', () => {
         { title: 'Test Feed', feedUrl: 'https://example.com/feed.xml' }
       ]
 
-      writeOpmlFile(testFilePath, feeds)
+      opmlService.writeOpmlFile(feeds)
 
       expect(fs.existsSync(testFilePath)).toBe(true)
       const content = fs.readFileSync(testFilePath, 'utf-8')
@@ -76,18 +76,19 @@ describe('OPML Service', () => {
 
     it('should create directory if it does not exist', () => {
       const nestedPath = path.join(testDir, 'nested', 'path', 'feeds.opml')
+      const nestedService = new OpmlService(nestedPath)
       const feeds: Feed[] = [{ title: 'Test', feedUrl: 'https://example.com/feed.xml' }]
 
-      writeOpmlFile(nestedPath, feeds)
+      nestedService.writeOpmlFile(feeds)
 
       expect(fs.existsSync(nestedPath)).toBe(true)
     })
 
     it('should handle empty feeds array', () => {
-      writeOpmlFile(testFilePath, [])
+      opmlService.writeOpmlFile([])
 
       expect(fs.existsSync(testFilePath)).toBe(true)
-      const result = readOpmlFile(testFilePath)
+      const result = opmlService.readOpmlFile()
       expect(result).toEqual([])
     })
 
@@ -95,10 +96,10 @@ describe('OPML Service', () => {
       const feeds1: Feed[] = [{ title: 'Feed 1', feedUrl: 'https://example.com/1.xml' }]
       const feeds2: Feed[] = [{ title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }]
 
-      writeOpmlFile(testFilePath, feeds1)
-      writeOpmlFile(testFilePath, feeds2)
+      opmlService.writeOpmlFile(feeds1)
+      opmlService.writeOpmlFile(feeds2)
 
-      const result = readOpmlFile(testFilePath)
+      const result = opmlService.readOpmlFile()
       expect(result).toHaveLength(1)
       expect(result[0].title).toBe('Feed 2')
     })
@@ -107,9 +108,9 @@ describe('OPML Service', () => {
   describe('addFeed', () => {
     it('should add feed to empty file', () => {
       const feed: Feed = { title: 'New Feed', feedUrl: 'https://example.com/feed.xml' }
-      addFeed(testFilePath, feed)
+      opmlService.addFeed(feed)
 
-      const feeds = readOpmlFile(testFilePath)
+      const feeds = opmlService.readOpmlFile()
       expect(feeds).toHaveLength(1)
       expect(feeds[0]).toEqual(feed)
     })
@@ -118,10 +119,10 @@ describe('OPML Service', () => {
       const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/1.xml' }
       const feed2: Feed = { title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }
 
-      addFeed(testFilePath, feed1)
-      addFeed(testFilePath, feed2)
+      opmlService.addFeed(feed1)
+      opmlService.addFeed(feed2)
 
-      const feeds = readOpmlFile(testFilePath)
+      const feeds = opmlService.readOpmlFile()
       expect(feeds).toHaveLength(2)
       expect(feeds[0]).toEqual(feed1)
       expect(feeds[1]).toEqual(feed2)
@@ -131,12 +132,12 @@ describe('OPML Service', () => {
       const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/feed.xml' }
       const feed2: Feed = { title: 'Feed 1 Different Title', feedUrl: 'https://example.com/feed.xml' }
 
-      addFeed(testFilePath, feed1)
+      opmlService.addFeed(feed1)
 
-      expect(() => addFeed(testFilePath, feed2)).toThrow(FeedAlreadyExistsError)
-      expect(() => addFeed(testFilePath, feed2)).toThrow('Feed already exists: https://example.com/feed.xml')
+      expect(() => opmlService.addFeed(feed2)).toThrow(FeedAlreadyExistsError)
+      expect(() => opmlService.addFeed(feed2)).toThrow('Feed already exists: https://example.com/feed.xml')
 
-      const feeds = readOpmlFile(testFilePath)
+      const feeds = opmlService.readOpmlFile()
       expect(feeds).toHaveLength(1)
       expect(feeds[0].title).toBe('Feed 1')
     })
@@ -145,17 +146,17 @@ describe('OPML Service', () => {
       const feed1: Feed = { title: 'Same Title', feedUrl: 'https://example.com/1.xml' }
       const feed2: Feed = { title: 'Same Title', feedUrl: 'https://example.com/2.xml' }
 
-      addFeed(testFilePath, feed1)
-      addFeed(testFilePath, feed2)
+      opmlService.addFeed(feed1)
+      opmlService.addFeed(feed2)
 
-      const feeds = readOpmlFile(testFilePath)
+      const feeds = opmlService.readOpmlFile()
       expect(feeds).toHaveLength(2)
     })
   })
 
   describe('getFeeds', () => {
     it('should return empty array when file does not exist', () => {
-      const result = getFeeds(testFilePath)
+      const result = opmlService.getFeeds()
       expect(result).toEqual([])
     })
 
@@ -166,8 +167,8 @@ describe('OPML Service', () => {
         { title: 'Feed 3', feedUrl: 'https://example.com/3.xml' }
       ]
 
-      writeOpmlFile(testFilePath, feeds)
-      const result = getFeeds(testFilePath)
+      opmlService.writeOpmlFile(feeds)
+      const result = opmlService.getFeeds()
 
       expect(result).toHaveLength(3)
       expect(result).toEqual(feeds)
@@ -180,20 +181,20 @@ describe('OPML Service', () => {
       const feed2: Feed = { title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }
       const feed3: Feed = { title: 'Feed 3', feedUrl: 'https://example.com/3.xml' }
 
-      addFeed(testFilePath, feed1)
-      let feeds = getFeeds(testFilePath)
+      opmlService.addFeed(feed1)
+      let feeds = opmlService.getFeeds()
       expect(feeds).toHaveLength(1)
 
-      addFeed(testFilePath, feed2)
-      feeds = getFeeds(testFilePath)
+      opmlService.addFeed(feed2)
+      feeds = opmlService.getFeeds()
       expect(feeds).toHaveLength(2)
 
-      addFeed(testFilePath, feed3)
-      feeds = getFeeds(testFilePath)
+      opmlService.addFeed(feed3)
+      feeds = opmlService.getFeeds()
       expect(feeds).toHaveLength(3)
 
-      expect(() => addFeed(testFilePath, feed1)).toThrow(FeedAlreadyExistsError)
-      feeds = getFeeds(testFilePath)
+      expect(() => opmlService.addFeed(feed1)).toThrow(FeedAlreadyExistsError)
+      feeds = opmlService.getFeeds()
       expect(feeds).toHaveLength(3)
     })
   })
