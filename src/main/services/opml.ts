@@ -54,20 +54,16 @@ export function readOpmlFile(filePath: string): Feed[] {
   const xmlContent = fs.readFileSync(filePath, 'utf-8')
   const feeds: Feed[] = []
 
-  try {
-    const result = parseOpmlSync(xmlContent)
-    const outlines = result.opml?.body?.subs || []
+  const result = parseOpmlSync(xmlContent)
+  const outlines = result.opml?.body?.subs || []
 
-    for (const outline of outlines) {
-      if (outline.xmlUrl) {
-        feeds.push({
-          title: outline.title || outline.text || outline.xmlUrl,
-          feedUrl: outline.xmlUrl
-        })
-      }
+  for (const outline of outlines) {
+    if (outline.xmlUrl) {
+      feeds.push({
+        title: outline.title || outline.text || outline.xmlUrl,
+        feedUrl: outline.xmlUrl
+      })
     }
-  } catch {
-    return []
   }
 
   return feeds
