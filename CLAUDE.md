@@ -9,6 +9,35 @@ You must use VScode tools whenever posible as described in .claude/vscode.md
 - Example: ❌ "Should I update this file?" → ✅ Just update it and report what was done.
 - This keeps interactions efficient and focused on delivering results.
 
+### Code Quality & Style Guidelines
+
+**Strict Minimalism**
+- **Write only what's needed now** - Never write code for future use or "just in case"
+- **No premature types/interfaces** - Only create types when actually using them
+- Example: Don't create `Article` and `FeedInfo` types until you need them
+
+**Import Statements**
+- **Always use ES6 imports** - Never use CommonJS `require()`
+- **Create `.d.ts` files** - When libraries lack TypeScript types, create declaration files in `src/main/types/`
+- Example: `import opml from 'opml'` not `const opml = require('opml')`
+
+**No Comments**
+- **Code must be self-documenting** - Remove all comments including JSDoc
+- **Clear naming over comments** - Function names and types should explain intent
+- Example: ❌ `/** Get OPML file path */` → ✅ `getOpmlFilePath(baseDir: string)`
+
+**Prefer Libraries Over Custom Code**
+- **Question complexity** - When custom code exceeds ~50 lines, search for existing libraries
+- **Research first** - Use WebSearch to find well-maintained npm packages
+- Example: Replaced 97 lines of regex-based OPML parsing with `opml` library
+
+**Error Handling**
+- **Let errors propagate** - Don't hide errors with empty try-catch blocks returning defaults
+- **Handle at higher levels** - Error handling belongs in IPC handlers/API layer, not service functions
+- **Throw named errors, not booleans** - Functions work or throw descriptive error classes
+- **Custom error classes** - Store in `src/main/types/errors.ts` extending Error
+- Example: `addFeed(): void` throws `FeedAlreadyExistsError` instead of returning `boolean`
+
 ### Git Commits
 
 - **Single-line conventional commits** - All commits must be one line only
@@ -95,7 +124,7 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
 
 **Core Libraries**:
 - `rss-parser` (v3.13.0) - Parses RSS and Atom feeds with built-in TypeScript support
-- `opml-generator` (v1.1.1) - Generates OPML files for feed storage
+- `opml` (v0.5.7) - Parses and generates OPML files for feed storage
 - Node.js built-in `fs` module for file operations (no external file utils needed)
 
 **Key Design Decisions**:
@@ -106,8 +135,7 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
 
 **TypeScript Type Definitions**:
 - `@types/rss-parser` doesn't exist on npm, but rss-parser has built-in TS support
-- `opml-parser` doesn't exist on npm; use `opml-generator` for writing OPML only
-- Define custom types for OPML reading as needed
+- `@types/opml` doesn't exist on npm; create custom type declaration file in `src/main/types/opml.d.ts`
 
 ## File Operations Best Practices
 
