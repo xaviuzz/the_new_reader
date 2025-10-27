@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as os from 'os'
 import { getOpmlFilePath, readOpmlFile, writeOpmlFile, addFeed, getFeeds } from '../opml'
 import { Feed } from '../../types'
+import { FeedAlreadyExistsError } from '../../types/errors'
 
 describe('OPML Service', () => {
   let testDir: string
@@ -106,9 +107,8 @@ describe('OPML Service', () => {
   describe('addFeed', () => {
     it('should add feed to empty file', () => {
       const feed: Feed = { title: 'New Feed', feedUrl: 'https://example.com/feed.xml' }
-      const result = addFeed(testFilePath, feed)
+      addFeed(testFilePath, feed)
 
-      expect(result).toBe(true)
       const feeds = readOpmlFile(testFilePath)
       expect(feeds).toHaveLength(1)
       expect(feeds[0]).toEqual(feed)
@@ -127,15 +127,14 @@ describe('OPML Service', () => {
       expect(feeds[1]).toEqual(feed2)
     })
 
-    it('should prevent duplicate feeds by URL', () => {
+    it('should throw FeedAlreadyExistsError for duplicate feeds by URL', () => {
       const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/feed.xml' }
       const feed2: Feed = { title: 'Feed 1 Different Title', feedUrl: 'https://example.com/feed.xml' }
 
-      const result1 = addFeed(testFilePath, feed1)
-      const result2 = addFeed(testFilePath, feed2)
+      addFeed(testFilePath, feed1)
 
-      expect(result1).toBe(true)
-      expect(result2).toBe(false)
+      expect(() => addFeed(testFilePath, feed2)).toThrow(FeedAlreadyExistsError)
+      expect(() => addFeed(testFilePath, feed2)).toThrow('Feed already exists: https://example.com/feed.xml')
 
       const feeds = readOpmlFile(testFilePath)
       expect(feeds).toHaveLength(1)
@@ -146,11 +145,8 @@ describe('OPML Service', () => {
       const feed1: Feed = { title: 'Same Title', feedUrl: 'https://example.com/1.xml' }
       const feed2: Feed = { title: 'Same Title', feedUrl: 'https://example.com/2.xml' }
 
-      const result1 = addFeed(testFilePath, feed1)
-      const result2 = addFeed(testFilePath, feed2)
-
-      expect(result1).toBe(true)
-      expect(result2).toBe(true)
+      addFeed(testFilePath, feed1)
+      addFeed(testFilePath, feed2)
 
       const feeds = readOpmlFile(testFilePath)
       expect(feeds).toHaveLength(2)
@@ -196,8 +192,7 @@ describe('OPML Service', () => {
       feeds = getFeeds(testFilePath)
       expect(feeds).toHaveLength(3)
 
-      // Try to add duplicate
-      addFeed(testFilePath, feed1)
+      expect(() => addFeed(testFilePath, feed1)).toThrow(FeedAlreadyExistsError)
       feeds = getFeeds(testFilePath)
       expect(feeds).toHaveLength(3)
     })

@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { Feed } from '../types'
+import { FeedAlreadyExistsError } from '../types/errors'
 import * as opml from 'opml'
 
 interface OpmlStructure {
@@ -98,17 +99,16 @@ export function writeOpmlFile(filePath: string, feeds: Feed[]): void {
   fs.writeFileSync(filePath, xmlOutput, 'utf-8')
 }
 
-export function addFeed(filePath: string, feed: Feed): boolean {
+export function addFeed(filePath: string, feed: Feed): void {
   const existingFeeds = readOpmlFile(filePath)
 
   const isDuplicate = existingFeeds.some((f) => f.feedUrl === feed.feedUrl)
   if (isDuplicate) {
-    return false
+    throw new FeedAlreadyExistsError(feed.feedUrl)
   }
 
   const updatedFeeds = [...existingFeeds, feed]
   writeOpmlFile(filePath, updatedFeeds)
-  return true
 }
 
 export function getFeeds(filePath: string): Feed[] {
