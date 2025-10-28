@@ -6,40 +6,52 @@ export class RssService {
   async validateAndFetchFeed(url: string, parser?: Parser): Promise<FeedInfo> {
     const rssParser = parser || new Parser()
 
-    try {
-      const feed = await rssParser.parseURL(url)
+    const result: FeedInfo = {
+      title: 'Untitled Feed',
+      description: '',
+      feedUrl: url
+    }
 
-      return {
-        title: feed.title || 'Untitled Feed',
-        description: feed.description || '',
-        feedUrl: url
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const feed = await rssParser.parseURL(url) as any
+      if (feed.title) {
+        result.title = feed.title
+      }
+      if (feed.description) {
+        result.description = feed.description
       }
     } catch (error) {
       throw new FetchFailedError(url, error as Error)
     }
+
+    return result
   }
 
   async fetchArticles(feedUrl: string, parser?: Parser): Promise<Article[]> {
     const rssParser = parser || new Parser()
 
-    try {
-      const feed = await rssParser.parseURL(feedUrl)
+    let articles: Article[] = []
 
-      const articles = (feed.items || []).map((item) => ({
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const feed = await rssParser.parseURL(feedUrl) as any
+      articles = (feed.items || []).map((item) => ({
         title: item.title || 'Untitled',
         link: item.link || '',
         pubDate: item.pubDate ? new Date(item.pubDate) : null,
         description: item.content || item.description || '',
         thumbnail: this.extractThumbnail(item)
       }))
-
-      return articles.sort((a, b) => {
+      articles.sort((a, b) => {
         if (!a.pubDate || !b.pubDate) return 0
         return b.pubDate.getTime() - a.pubDate.getTime()
       })
     } catch (error) {
       throw new FetchFailedError(feedUrl, error as Error)
     }
+
+    return articles
   }
 
   private extractThumbnail(item: Parser.Item): string | null {

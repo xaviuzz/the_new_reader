@@ -36,7 +36,9 @@ You must use VScode tools whenever posible as described in .claude/vscode.md
 - **Handle at higher levels** - Error handling belongs in IPC handlers/API layer, not service functions
 - **Throw named errors, not booleans** - Functions work or throw descriptive error classes
 - **Custom error classes** - Store in `src/main/types/errors.ts` extending Error
+- **Error class design** - Include relevant context (URL, operation name) in error message, accept optional original error for message chaining
 - Example: `addFeed(): void` throws `FeedAlreadyExistsError` instead of returning `boolean`
+- Example: `FetchFailedError` takes `(url: string, originalError?: Error)` to capture and wrap underlying errors
 
 ### Git Commits
 
@@ -172,6 +174,68 @@ export class OpmlService {
   writeOpmlFile(feeds: Feed[]): void { ... }
   addFeed(feed: Feed): void { ... }
   getFeeds(): Feed[] { ... }
+}
+```
+
+### Function Control Flow Pattern: Result Variable
+
+Structure async functions to always have the return statement at the end, not inside try blocks. Initialize result with safe defaults, then update conditionally on success:
+
+**Pattern:**
+1. Initialize result variable with default/safe values
+2. Try to fetch/process data
+3. If successful, update result with actual values using explicit `if` statements
+4. Catch errors and throw named error classes
+5. Return result at the end
+
+**Benefits:**
+- Return statement is always at the function's end, making control flow clearer
+- Result is always defined, initialized with sensible defaults
+- Easier to reason about what happens on success vs. failure
+- Uses explicit conditionals instead of `||` operators (more readable)
+
+**Example:**
+```typescript
+async validateAndFetchFeed(url: string, parser?: Parser): Promise<FeedInfo> {
+  const rssParser = parser || new Parser()
+
+  // Initialize result with defaults
+  const result: FeedInfo = {
+    title: 'Untitled Feed',
+    description: '',
+    feedUrl: url
+  }
+
+  try {
+    const feed = await rssParser.parseURL(url) as any
+    // Update result only if values exist
+    if (feed.title) {
+      result.title = feed.title
+    }
+    if (feed.description) {
+      result.description = feed.description
+    }
+  } catch (error) {
+    throw new FetchFailedError(url, error as Error)
+  }
+
+  // Single return point at the end
+  return result
+}
+```
+
+**Avoid:**
+```typescript
+// ❌ Return inside try block, unclear structure
+try {
+  const feed = await rssParser.parseURL(url)
+  return {
+    title: feed.title || 'Untitled Feed',
+    description: feed.description || '',
+    feedUrl: url
+  }
+} catch (error) {
+  throw new FetchFailedError(url, error as Error)
 }
 ```
 
