@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Parser from 'rss-parser'
 import { RssService } from '../rss'
+import { FetchFailedError } from '../../types/errors'
 
 describe('RssService', () => {
   let service: RssService
@@ -90,7 +91,7 @@ describe('RssService', () => {
           'https://invalid-url-that-does-not-exist.com/feed.xml',
           mockParser
         )
-      ).rejects.toThrow('Failed to fetch feed from')
+      ).rejects.toThrow(FetchFailedError)
     })
 
     it('should throw error for malformed feed', async () => {
@@ -98,7 +99,7 @@ describe('RssService', () => {
 
       await expect(
         service.validateAndFetchFeed('https://example.com/bad.xml', mockParser)
-      ).rejects.toThrow('Failed to fetch feed')
+      ).rejects.toThrow(FetchFailedError)
     })
   })
 
@@ -363,7 +364,7 @@ describe('RssService', () => {
 
       await expect(
         service.fetchArticles('https://example.com/feed.xml', mockParser)
-      ).rejects.toThrow('Failed to fetch articles')
+      ).rejects.toThrow(FetchFailedError)
     })
   })
 })

@@ -1,5 +1,6 @@
 import Parser from 'rss-parser'
 import type { Article, FeedInfo } from '../types'
+import { FetchFailedError } from '../types/errors'
 
 export class RssService {
   async validateAndFetchFeed(url: string, parser?: Parser): Promise<FeedInfo> {
@@ -14,8 +15,7 @@ export class RssService {
         feedUrl: url
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-      throw new Error(`Failed to fetch feed from ${url}: ${errorMsg}`)
+      throw new FetchFailedError(url, error instanceof Error ? error : undefined)
     }
   }
 
@@ -38,8 +38,7 @@ export class RssService {
         return b.pubDate.getTime() - a.pubDate.getTime()
       })
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-      throw new Error(`Failed to fetch articles from ${feedUrl}: ${errorMsg}`)
+      throw new FetchFailedError(feedUrl, error instanceof Error ? error : undefined)
     }
   }
 
