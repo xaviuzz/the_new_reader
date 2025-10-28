@@ -15,7 +15,7 @@ export class RssService {
         feedUrl: url
       }
     } catch (error) {
-      throw new FetchFailedError(url, error instanceof Error ? error : undefined)
+      throw new FetchFailedError(url, error as Error)
     }
   }
 
@@ -38,7 +38,7 @@ export class RssService {
         return b.pubDate.getTime() - a.pubDate.getTime()
       })
     } catch (error) {
-      throw new FetchFailedError(feedUrl, error instanceof Error ? error : undefined)
+      throw new FetchFailedError(feedUrl, error as Error)
     }
   }
 
