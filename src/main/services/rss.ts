@@ -1,18 +1,5 @@
 import Parser from 'rss-parser'
-
-export interface FeedInfo {
-  title: string
-  description: string
-  feedUrl: string
-}
-
-export interface Article {
-  title: string
-  link: string
-  pubDate: Date | null
-  description: string
-  thumbnail: string | null
-}
+import type { Article, FeedInfo } from '../types'
 
 export class RssService {
   async validateAndFetchFeed(url: string, parser?: Parser): Promise<FeedInfo> {
