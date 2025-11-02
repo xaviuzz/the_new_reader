@@ -36,22 +36,31 @@ export class RssService {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const feed = await rssParser.parseURL(feedUrl) as any
-      articles = (feed.items || []).map((item) => ({
-        title: item.title || 'Untitled',
-        link: item.link || '',
-        pubDate: item.pubDate ? new Date(item.pubDate) : null,
-        description: item.content || item.description || '',
-        thumbnail: this.extractThumbnail(item)
-      }))
-      articles.sort((a, b) => {
-        if (!a.pubDate || !b.pubDate) return 0
-        return b.pubDate.getTime() - a.pubDate.getTime()
-      })
+      articles = this.mapFeedItemsToArticles(feed.items || [])
+      this.sortArticlesByDate(articles)
     } catch (error) {
       throw new FetchFailedError(feedUrl, error as Error)
     }
 
     return articles
+  }
+
+  private mapFeedItemsToArticles(items: unknown[]): Article[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return items.map((item: any) => ({
+      title: item.title || 'Untitled',
+      link: item.link || '',
+      pubDate: item.pubDate ? new Date(item.pubDate) : null,
+      description: item.content || item.description || '',
+      thumbnail: this.extractThumbnail(item)
+    }))
+  }
+
+  private sortArticlesByDate(articles: Article[]): void {
+    articles.sort((a, b) => {
+      if (!a.pubDate || !b.pubDate) return 0
+      return b.pubDate.getTime() - a.pubDate.getTime()
+    })
   }
 
   private extractThumbnail(item: Parser.Item): string | null {

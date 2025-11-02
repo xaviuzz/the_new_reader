@@ -163,7 +163,55 @@ Keep internal helper methods private; only expose the public API that consumers 
 - Allows internal refactoring without breaking external code
 - Clear separation between public contract and private implementation
 
-**Example:**
+**Extract helpers when a public method contains multiple distinct processes:**
+When a method performs several sequential operations (fetch → transform → sort), extract each process into a named private helper. This makes the main method read like a high-level description of the workflow, while keeping implementation details encapsulated.
+
+**Example - Multi-step process extraction:**
+```typescript
+export class RssService {
+  async fetchArticles(feedUrl: string, parser?: Parser): Promise<Article[]> {
+    const rssParser = parser || new Parser()
+    let articles: Article[] = []
+
+    try {
+      const feed = await rssParser.parseURL(feedUrl) as any
+      articles = this.mapFeedItemsToArticles(feed.items || [])
+      this.sortArticlesByDate(articles)
+    } catch (error) {
+      throw new FetchFailedError(feedUrl, error as Error)
+    }
+
+    return articles
+  }
+
+  // Process 1: Transform raw feed items into typed Article objects
+  private mapFeedItemsToArticles(items: unknown[]): Article[] {
+    return items.map((item: any) => ({
+      title: item.title || 'Untitled',
+      link: item.link || '',
+      pubDate: item.pubDate ? new Date(item.pubDate) : null,
+      description: item.content || item.description || '',
+      thumbnail: this.extractThumbnail(item)
+    }))
+  }
+
+  // Process 2: Sort articles by publication date (newest first)
+  private sortArticlesByDate(articles: Article[]): void {
+    articles.sort((a, b) => {
+      if (!a.pubDate || !b.pubDate) return 0
+      return b.pubDate.getTime() - a.pubDate.getTime()
+    })
+  }
+
+  private extractThumbnail(item: Parser.Item): string | null {
+    // ... thumbnail extraction logic
+  }
+}
+```
+
+The try block now reads: "fetch feed → map items to articles → sort by date", making the workflow obvious without diving into implementation details.
+
+**Another example - OPML Service:**
 ```typescript
 export class OpmlService {
   private parseOpmlSync(xmlContent: string): OpmlStructure { ... }
