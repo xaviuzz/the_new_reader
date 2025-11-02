@@ -10,7 +10,6 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
   const [theme, setTheme] = useState<Theme>('flexokilight')
 
   useEffect(() => {
-    // Apply theme to document
     document.documentElement.setAttribute('data-theme', theme)
     onThemeChange?.(theme)
   }, [theme, onThemeChange])

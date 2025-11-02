@@ -9,7 +9,7 @@ function App(): React.JSX.Element {
 
   return (
     <div className="flex h-screen flex-col bg-base-100 text-base-content">
-      <Navbar />
+      <Navbar onAddFeed={() => {}} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar onSelectFeed={setSelectedFeed} />
         <ArticleList feed={selectedFeed} />
