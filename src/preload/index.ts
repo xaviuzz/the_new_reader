@@ -1,8 +1,13 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { Feed, Article } from '../main/domain'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  addFeed: (url: string): Promise<Feed> => ipcRenderer.invoke('feeds:add', url),
+  listFeeds: (): Promise<Feed[]> => ipcRenderer.invoke('feeds:list'),
+  getArticles: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:getArticles', feedUrl)
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
