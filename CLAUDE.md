@@ -499,6 +499,183 @@ try {
 }
 ```
 
+## React Component Testing Patterns
+
+### SUT (Subject Under Test) Pattern
+
+Encapsulate all component setup, rendering, and DOM queries into an inner SUT class within each test suite. This keeps tests focused purely on behavior assertions.
+
+**Structure:**
+```typescript
+describe('Navbar', () => {
+  // Tests use SUT for setup and queries
+  it('should render navbar', () => {
+    const sut = new NavbarSUT()
+    expect(sut.getNavbar()).toBeInTheDocument()
+  })
+
+  // SUT class encapsulates implementation details
+  class NavbarSUT {
+    onAddFeed: MockedFunction<() => void>
+
+    constructor() {
+      this.onAddFeed = vi.fn()
+      render(<Navbar onAddFeed={this.onAddFeed} />)
+    }
+
+    getNavbar(): HTMLElement | null {
+      return screen.getByRole('navigation')
+    }
+
+    getAddFeedButton(): HTMLElement | null {
+      return screen.getByRole('button', { name: /add feed/i })
+    }
+
+    async clickAddFeedButton(): Promise<void> {
+      const button = this.getAddFeedButton()
+      if (button) await userEvent.click(button)
+    }
+  }
+})
+```
+
+**Benefits:**
+- Tests read linearly: setup → act → assert
+- All DOM queries hidden from test assertions
+- Mocks centralized in constructor
+- Easy to refactor component internals without changing test assertions
+
+### Role-Based Queries Over CSS Selectors
+
+Always use ARIA roles (`getByRole`, `getAllByRole`) instead of CSS selectors (`querySelector`, `querySelectorAll`). Tests become resilient to styling changes and match how accessible users interact with components.
+
+**Pattern:**
+```typescript
+// ❌ Brittle - coupled to CSS
+expect(container.querySelector('.navbar')).toBeInTheDocument()
+expect(container.querySelector('.flex.items-center.gap-4')).toBeInTheDocument()
+
+// ✅ Resilient - role-based
+expect(screen.getByRole('navigation')).toBeInTheDocument()
+expect(screen.getByRole('group')).toBeInTheDocument()
+```
+
+**Common ARIA Roles:**
+- `navigation` - `<nav>` elements
+- `complementary` - `<aside>` elements
+- `main` - `<main>` elements
+- `button` - `<button>` elements
+- `link` - `<a href="#">` elements
+- `heading` - `<h1>`, `<h2>`, etc.
+- `article` - `<article>` elements
+
+**Benefits:**
+- Tests survive CSS refactoring (class renames, layout changes)
+- Matches accessibility practices
+- Clearer test intent
+- Encourages semantic HTML in components
+
+### Semantic HTML for Testability
+
+Use proper semantic HTML elements and ensure interactive elements have required attributes. Non-semantic elements won't have implicit roles, breaking role-based queries.
+
+**Pattern:**
+```typescript
+// ❌ Missing href - <a> element has no link role without href
+<a onClick={() => onSelect(feed)}>
+  {feed.title}
+</a>
+
+// ✅ Proper link with href and preventDefault
+<a
+  href="#"
+  onClick={(e) => {
+    e.preventDefault()
+    onSelect(feed)
+  }}
+>
+  {feed.title}
+</a>
+
+// ✅ Proper landmarks in layout
+<nav className="p-4">
+  <ul className="menu">
+    {feeds.map(feed => <li key={feed.id}><a href="#">{feed.title}</a></li>)}
+  </ul>
+</nav>
+```
+
+**Benefits:**
+- Components automatically testable with roles
+- Improved accessibility (keyboard navigation, screen readers)
+- Clear semantic structure
+- No workarounds needed in tests
+
+### Semantic Identifiers Over Position
+
+Query elements by meaningful identifiers (button names, feed titles, link text) instead of array indices. Prevents brittle position-dependent tests.
+
+**Pattern:**
+```typescript
+// ❌ Brittle - breaks if button order changes
+const buttons = screen.getAllByRole('button')
+await userEvent.click(buttons[0])
+
+// ✅ Semantic - resilient
+const addButton = screen.getByRole('button', { name: /add feed/i })
+await userEvent.click(addButton)
+
+// ❌ Brittle - position-based navigation link
+const links = screen.getAllByRole('link')
+await userEvent.click(links[0])
+
+// ✅ Semantic - by feed name
+const hackerNewsLink = screen.getByRole('link', { name: 'Hacker News' })
+await userEvent.click(hackerNewsLink)
+```
+
+**Benefits:**
+- Tests document intent clearly
+- Survive DOM reordering
+- Self-documenting test code
+- Less maintenance when UI changes
+
+### Query Method Patterns in SUT
+
+Use consistent SUT method patterns that return elements and support common test workflows.
+
+**Pattern:**
+```typescript
+class ArticleListSUT {
+  // Singular queries return element or null
+  getMainContent(): HTMLElement | null {
+    return screen.getByRole('main')
+  }
+
+  // Plural queries return array
+  getArticles(): HTMLElement[] {
+    return Array.from(screen.getAllByRole('article'))
+  }
+
+  // Named queries with specific identifiers
+  getFeedLink(feedName: string): HTMLElement | null {
+    return screen.getByRole('link', { name: feedName })
+  }
+
+  // Action methods encapsulate user events
+  async clickFeedLink(feedName: string): Promise<void> {
+    const link = this.getFeedLink(feedName)
+    if (link) await userEvent.click(link)
+  }
+}
+```
+
+**Benefits:**
+- Consistent, predictable API
+- Type safety (null checks built-in)
+- Self-documenting method names
+- Easy to compose complex interactions
+
 ## The New Reader - RSS Feed Application
 
 ### Architecture & Dependencies
