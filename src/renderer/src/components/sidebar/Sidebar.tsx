@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { Feed } from '../../../main/domain'
+import { Feed } from '../../../../main/domain'
+import { FeedListItem } from './components/FeedListItem'
+import { EmptyFeedState } from './components/EmptyFeedState'
 
 const mockFeeds: Feed[] = [
   new Feed('Hacker News', 'https://news.ycombinator.com/rss', 'Latest technology and startup news'),
@@ -27,20 +29,16 @@ export function Sidebar({ onSelectFeed }: SidebarProps): React.JSX.Element {
         <h2 className="text-lg font-semibold mb-4">Feeds</h2>
 
         {mockFeeds.length === 0 ? (
-          <div className="text-sm text-base-content opacity-60">
-            No feeds. Click + to add one.
-          </div>
+          <EmptyFeedState />
         ) : (
           <ul className="menu menu-compact gap-2">
             {mockFeeds.map((feed) => (
-              <li key={feed.feedUrl}>
-                <a
-                  onClick={() => handleSelectFeed(feed)}
-                  className={selectedFeedUrl === feed.feedUrl ? 'active' : ''}
-                >
-                  <span className="truncate">{feed.title}</span>
-                </a>
-              </li>
+              <FeedListItem
+                key={feed.feedUrl}
+                feed={feed}
+                isSelected={selectedFeedUrl === feed.feedUrl}
+                onSelect={handleSelectFeed}
+              />
             ))}
           </ul>
         )}

@@ -1,6 +1,7 @@
 import React from 'react'
-import type { Article } from '../../../main/domain'
-import type { Feed } from '../../../main/domain'
+import type { Article } from '../../../../main/domain'
+import type { Feed } from '../../../../main/domain'
+import { ArticleCard } from './components/ArticleCard'
 
 const mockArticles: Article[] = [
   {
@@ -50,15 +51,6 @@ interface ArticleListProps {
 }
 
 export function ArticleList({ feed }: ArticleListProps): React.JSX.Element {
-  const formatDate = (date: Date | null): string => {
-    if (!date) return ''
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-4xl">
@@ -66,29 +58,7 @@ export function ArticleList({ feed }: ArticleListProps): React.JSX.Element {
 
         <div className="space-y-4">
           {mockArticles.map((article) => (
-            <article
-              key={article.link}
-              className="card bg-base-100 border border-base-300 hover:border-primary cursor-pointer transition-colors"
-            >
-              <div className="card-body">
-                <h3 className="card-title text-lg line-clamp-2">{article.title}</h3>
-                <p className="text-sm text-base-content opacity-70 line-clamp-2">
-                  {article.description}
-                </p>
-                <div className="flex items-center justify-between text-xs text-base-content opacity-60">
-                  <span>{formatDate(article.pubDate)}</span>
-                  <a
-                    href={article.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link link-primary"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Read more
-                  </a>
-                </div>
-              </div>
-            </article>
+            <ArticleCard key={article.link} article={article} />
           ))}
         </div>
       </div>

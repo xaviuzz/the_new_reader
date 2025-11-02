@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { Feed } from '../../main/domain'
 import { Navbar } from './components/navbar'
-import { Sidebar } from './components/Sidebar'
-import { ArticleList } from './components/ArticleList'
+import { Sidebar } from './components/sidebar'
+import { ArticleList } from './components/article'
 
 function App(): React.JSX.Element {
   const [selectedFeed, setSelectedFeed] = useState<Feed | undefined>()
