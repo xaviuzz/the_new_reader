@@ -24,8 +24,8 @@ export function Sidebar({ onSelectFeed }: SidebarProps): React.JSX.Element {
   }
 
   return (
-    <div className="w-64 bg-base-200 border-r border-base-300 overflow-y-auto">
-      <div className="p-4">
+    <aside className="w-64 bg-base-200 border-r border-base-300 overflow-y-auto">
+      <nav className="p-4">
         <h2 className="text-lg font-semibold mb-4">Feeds</h2>
 
         {mockFeeds.length === 0 ? (
@@ -42,7 +42,7 @@ export function Sidebar({ onSelectFeed }: SidebarProps): React.JSX.Element {
             ))}
           </ul>
         )}
-      </div>
-    </div>
+      </nav>
+    </aside>
   )
 }

@@ -8,9 +8,9 @@ interface NavbarProps {
 
 export function Navbar({ onAddFeed }: NavbarProps): React.JSX.Element {
   return (
-    <div className="navbar bg-base-100 shadow-sm border-b border-base-300">
+    <nav className="navbar bg-base-100 shadow-sm border-b border-base-300">
       <Brand />
       <Actions onAddFeed={onAddFeed} />
-    </div>
+    </nav>
   )
 }

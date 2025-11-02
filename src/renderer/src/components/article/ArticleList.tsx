@@ -52,7 +52,7 @@ interface ArticleListProps {
 
 export function ArticleList({ feed }: ArticleListProps): React.JSX.Element {
   return (
-    <div className="flex-1 overflow-y-auto p-6">
+    <main className="flex-1 overflow-y-auto p-6">
       <div className="max-w-4xl">
         {feed && <h2 className="text-2xl font-bold mb-6">{feed.title}</h2>}
 
@@ -62,6 +62,6 @@ export function ArticleList({ feed }: ArticleListProps): React.JSX.Element {
           ))}
         </div>
       </div>
-    </div>
+    </main>
   )
 }

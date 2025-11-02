@@ -11,7 +11,11 @@ export function FeedListItem({ feed, isSelected, onSelect }: FeedListItemProps):
   return (
     <li>
       <a
-        onClick={() => onSelect(feed)}
+        href="#"
+        onClick={(e) => {
+          e.preventDefault()
+          onSelect(feed)
+        }}
         className={isSelected ? 'active' : ''}
       >
         <span className="truncate">{feed.title}</span>

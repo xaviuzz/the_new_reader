@@ -8,7 +8,7 @@ interface ActionsProps {
 
 export function Actions({ onAddFeed }: ActionsProps): React.JSX.Element {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-4" role="group">
       <AddFeedButton onClick={onAddFeed} />
       <ThemeSwitcher />
     </div>
