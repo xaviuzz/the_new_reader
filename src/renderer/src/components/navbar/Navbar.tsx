@@ -1,6 +1,6 @@
 import React from 'react'
-import { NavbarBrand } from './NavbarBrand'
-import { NavbarActions } from './NavbarActions'
+import { Brand } from './components/Brand'
+import { Actions } from './components/Actions'
 
 interface NavbarProps {
   onAddFeed?: () => void
@@ -9,8 +9,8 @@ interface NavbarProps {
 export function Navbar({ onAddFeed }: NavbarProps): React.JSX.Element {
   return (
     <div className="navbar bg-base-100 shadow-sm border-b border-base-300">
-      <NavbarBrand />
-      <NavbarActions onAddFeed={onAddFeed} />
+      <Brand />
+      <Actions onAddFeed={onAddFeed} />
     </div>
   )
 }
