@@ -16,3 +16,5 @@ export interface Article {
   description: string
   thumbnail: string | null
 }
+
+export type { RssFeed, RssItem, RssEnclosure } from './rss'

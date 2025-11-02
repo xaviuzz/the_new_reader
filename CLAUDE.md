@@ -31,6 +31,20 @@ You must use VScode tools whenever posible as described in .claude/vscode.md
 - **Research first** - Use WebSearch to find well-maintained npm packages
 - Example: Replaced 97 lines of regex-based OPML parsing with `opml` library
 
+**Type Safety with External Libraries**
+- **Use library type definitions directly** - Don't cast to `any`; leverage built-in TypeScript support
+- **Create type alias files** - Wrap library types in dedicated files (`src/main/types/rss.ts`) for centralized management
+- **Extend library types when needed** - Use intersection types (`&`) to add missing properties without casting
+- **Choose generic parameters carefully** - Use `{ [key: string]: unknown }` when library defaults use `any`, not `Record<string, never>` (which conflicts) or `{}` (too permissive)
+- Example: `export type RssFeed = Parser.Output<{ [key: string]: unknown }>`
+- Example: `export type RssItem = Parser.Item & { description?: string }` (extends Parser.Item with optional field)
+- **Re-export types from index** - Make type aliases available via `src/main/types/index.ts` for convenience
+
+**Type Duplication is Acceptable**
+- **Don't merge types just to eliminate duplication** - If types represent different semantic contexts or lifecycle stages, keep them separate
+- **Example**: `Feed` (stored in OPML) and `FeedInfo` (fetched from RSS source) are intentionally similar but serve different purposes
+- **Clarity over DRYness** - Small duplication improves readability by signaling different contexts
+
 **Error Handling**
 - **Let errors propagate** - Don't hide errors with empty try-catch blocks returning defaults
 - **Handle at higher levels** - Error handling belongs in IPC handlers/API layer, not service functions

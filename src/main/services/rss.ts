@@ -1,5 +1,6 @@
 import Parser from 'rss-parser'
 import type { Article, FeedInfo } from '../types'
+import type { RssFeed, RssItem } from '../types/rss'
 import { FetchFailedError } from '../types/errors'
 
 export class RssService {
@@ -13,8 +14,7 @@ export class RssService {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const feed = await rssParser.parseURL(url) as any
+      const feed: RssFeed = await rssParser.parseURL(url)
       if (feed.title) {
         result.title = feed.title
       }
@@ -34,8 +34,7 @@ export class RssService {
     let articles: Article[] = []
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const feed = await rssParser.parseURL(feedUrl) as any
+      const feed: RssFeed = await rssParser.parseURL(feedUrl)
       articles = this.mapFeedItemsToArticles(feed.items || [])
       this.sortArticlesByDate(articles)
     } catch (error) {
@@ -45,9 +44,8 @@ export class RssService {
     return articles
   }
 
-  private mapFeedItemsToArticles(items: unknown[]): Article[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return items.map((item: any) => ({
+  private mapFeedItemsToArticles(items: RssItem[]): Article[] {
+    return items.map((item) => ({
       title: item.title || 'Untitled',
       link: item.link || '',
       pubDate: item.pubDate ? new Date(item.pubDate) : null,
@@ -63,7 +61,7 @@ export class RssService {
     })
   }
 
-  private extractThumbnail(item: Parser.Item): string | null {
+  private extractThumbnail(item: RssItem): string | null {
     if (item.enclosure?.url) {
       return item.enclosure.url
     }
