@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { Feed } from '../types'
+import { Feed } from '../domain'
 import { FeedAlreadyExistsError } from '../types/errors'
 import * as opml from 'opml'
 
@@ -66,11 +66,9 @@ export class OpmlService {
     const outlines = result.opml?.body?.subs || []
 
     for (const outline of outlines) {
-      if (outline.xmlUrl) {
-        feeds.push({
-          title: outline.title || outline.text || outline.xmlUrl,
-          feedUrl: outline.xmlUrl
-        })
+      const feed = Feed.fromOpmlOutline(outline)
+      if (feed) {
+        feeds.push(feed)
       }
     }
 
@@ -86,13 +84,7 @@ export class OpmlService {
           ownerName: 'The New Reader'
         },
         body: {
-          subs: feeds.map((feed) => ({
-            text: feed.title,
-            title: feed.title,
-            type: 'rss',
-            xmlUrl: feed.feedUrl,
-            htmlUrl: feed.feedUrl
-          }))
+          subs: feeds.map((feed) => feed.toOpmlOutline())
         }
       }
     }
@@ -109,7 +101,7 @@ export class OpmlService {
   addFeed(feed: Feed): void {
     const existingFeeds = this.readOpmlFile()
 
-    const isDuplicate = existingFeeds.some((f) => f.feedUrl === feed.feedUrl)
+    const isDuplicate = existingFeeds.some((f) => f.equals(feed))
     if (isDuplicate) {
       throw new FeedAlreadyExistsError(feed.feedUrl)
     }

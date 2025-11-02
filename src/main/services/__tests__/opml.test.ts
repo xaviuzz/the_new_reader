@@ -43,8 +43,8 @@ describe('OPML Service', () => {
 
     it('should read feeds from existing OPML file', () => {
       const feeds: Feed[] = [
-        { title: 'BBC News', feedUrl: 'https://feeds.bbci.co.uk/news/rss.xml' },
-        { title: 'NY Times', feedUrl: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' }
+        new Feed('BBC News', 'https://feeds.bbci.co.uk/news/rss.xml'),
+        new Feed('NY Times', 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml')
       ]
 
       opmlService.writeOpmlFile(feeds)
@@ -61,7 +61,7 @@ describe('OPML Service', () => {
   describe('writeOpmlFile', () => {
     it('should create valid OPML file with feeds', () => {
       const feeds: Feed[] = [
-        { title: 'Test Feed', feedUrl: 'https://example.com/feed.xml' }
+        new Feed('Test Feed', 'https://example.com/feed.xml')
       ]
 
       opmlService.writeOpmlFile(feeds)
@@ -77,7 +77,7 @@ describe('OPML Service', () => {
     it('should create directory if it does not exist', () => {
       const nestedPath = path.join(testDir, 'nested', 'path', 'feeds.opml')
       const nestedService = new OpmlService(nestedPath)
-      const feeds: Feed[] = [{ title: 'Test', feedUrl: 'https://example.com/feed.xml' }]
+      const feeds: Feed[] = [new Feed('Test', 'https://example.com/feed.xml')]
 
       nestedService.writeOpmlFile(feeds)
 
@@ -93,8 +93,8 @@ describe('OPML Service', () => {
     })
 
     it('should overwrite existing file', () => {
-      const feeds1: Feed[] = [{ title: 'Feed 1', feedUrl: 'https://example.com/1.xml' }]
-      const feeds2: Feed[] = [{ title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }]
+      const feeds1: Feed[] = [new Feed('Feed 1', 'https://example.com/1.xml')]
+      const feeds2: Feed[] = [new Feed('Feed 2', 'https://example.com/2.xml')]
 
       opmlService.writeOpmlFile(feeds1)
       opmlService.writeOpmlFile(feeds2)
@@ -107,7 +107,7 @@ describe('OPML Service', () => {
 
   describe('addFeed', () => {
     it('should add feed to empty file', () => {
-      const feed: Feed = { title: 'New Feed', feedUrl: 'https://example.com/feed.xml' }
+      const feed: Feed = new Feed('New Feed', 'https://example.com/feed.xml')
       opmlService.addFeed(feed)
 
       const feeds = opmlService.readOpmlFile()
@@ -116,8 +116,8 @@ describe('OPML Service', () => {
     })
 
     it('should add feed to existing feeds', () => {
-      const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/1.xml' }
-      const feed2: Feed = { title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      const feed2: Feed = new Feed('Feed 2', 'https://example.com/2.xml')
 
       opmlService.addFeed(feed1)
       opmlService.addFeed(feed2)
@@ -129,8 +129,8 @@ describe('OPML Service', () => {
     })
 
     it('should throw FeedAlreadyExistsError for duplicate feeds by URL', () => {
-      const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/feed.xml' }
-      const feed2: Feed = { title: 'Feed 1 Different Title', feedUrl: 'https://example.com/feed.xml' }
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/feed.xml')
+      const feed2: Feed = new Feed('Feed 1 Different Title', 'https://example.com/feed.xml')
 
       opmlService.addFeed(feed1)
 
@@ -143,8 +143,8 @@ describe('OPML Service', () => {
     })
 
     it('should allow feeds with different URLs', () => {
-      const feed1: Feed = { title: 'Same Title', feedUrl: 'https://example.com/1.xml' }
-      const feed2: Feed = { title: 'Same Title', feedUrl: 'https://example.com/2.xml' }
+      const feed1: Feed = new Feed('Same Title', 'https://example.com/1.xml')
+      const feed2: Feed = new Feed('Same Title', 'https://example.com/2.xml')
 
       opmlService.addFeed(feed1)
       opmlService.addFeed(feed2)
@@ -162,9 +162,9 @@ describe('OPML Service', () => {
 
     it('should return all feeds', () => {
       const feeds: Feed[] = [
-        { title: 'Feed 1', feedUrl: 'https://example.com/1.xml' },
-        { title: 'Feed 2', feedUrl: 'https://example.com/2.xml' },
-        { title: 'Feed 3', feedUrl: 'https://example.com/3.xml' }
+        new Feed('Feed 1', 'https://example.com/1.xml'),
+        new Feed('Feed 2', 'https://example.com/2.xml'),
+        new Feed('Feed 3', 'https://example.com/3.xml')
       ]
 
       opmlService.writeOpmlFile(feeds)
@@ -177,9 +177,9 @@ describe('OPML Service', () => {
 
   describe('Multiple operations', () => {
     it('should handle multiple add and read operations correctly', () => {
-      const feed1: Feed = { title: 'Feed 1', feedUrl: 'https://example.com/1.xml' }
-      const feed2: Feed = { title: 'Feed 2', feedUrl: 'https://example.com/2.xml' }
-      const feed3: Feed = { title: 'Feed 3', feedUrl: 'https://example.com/3.xml' }
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      const feed2: Feed = new Feed('Feed 2', 'https://example.com/2.xml')
+      const feed3: Feed = new Feed('Feed 3', 'https://example.com/3.xml')
 
       opmlService.addFeed(feed1)
       let feeds = opmlService.getFeeds()

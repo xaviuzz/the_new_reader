@@ -239,6 +239,135 @@ export class OpmlService {
 }
 ```
 
+### Domain Model Patterns
+
+Move from anemic data structures to rich domain classes that encapsulate behavior and transformation logic.
+
+**Static factory methods for external data transformation:**
+When transforming data from external sources (RSS feeds, OPML files, API responses), use static factory methods on domain classes. This encapsulates normalization logic (defaults, parsing, validation) where it belongs—with the domain object.
+
+```typescript
+export class Feed {
+  constructor(
+    readonly title: string,
+    readonly feedUrl: string,
+    readonly description: string = ''
+  ) {}
+
+  // Factory for RSS source - handles RSS-specific defaults
+  static fromRssFeed(url: string, rssFeed: RssFeed): Feed {
+    return new Feed(
+      rssFeed.title || 'Untitled Feed',
+      url,
+      rssFeed.description || ''
+    )
+  }
+
+  // Factory for OPML source - handles OPML-specific defaults
+  static fromOpmlOutline(outline: OpmlOutline): Feed | null {
+    if (!outline.xmlUrl) {
+      return null
+    }
+    return new Feed(
+      outline.title || outline.text || outline.xmlUrl,
+      outline.xmlUrl,
+      ''
+    )
+  }
+}
+```
+
+**Service simplification with domain factories:**
+Services become thin orchestrators that delegate transformation to domain factory methods:
+
+```typescript
+// Before: 10+ lines of conditional logic for defaults
+async validateAndFetchFeed(url: string, parser?: Parser): Promise<Feed> {
+  const rssParser = parser || new Parser()
+  let title = 'Untitled Feed'
+  let description = ''
+  try {
+    const feed = await rssParser.parseURL(url)
+    if (feed.title) title = feed.title
+    if (feed.description) description = feed.description
+  } catch (error) {
+    throw new FetchFailedError(url, error as Error)
+  }
+  return new Feed(title, url, description)
+}
+
+// After: Clear intent, normalization in domain
+async validateAndFetchFeed(url: string, parser?: Parser): Promise<Feed> {
+  try {
+    const rssFeed = await rssParser.parseURL(url)
+    return Feed.fromRssFeed(url, rssFeed)
+  } catch (error) {
+    throw new FetchFailedError(url, error as Error)
+  }
+}
+```
+
+**Benefits:**
+- Normalization logic co-located with domain objects
+- Factory method names document transformation source
+- Services remain focused on orchestration
+- Consistent pattern across multiple external sources
+
+**Hybrid domain model for gradual migration:**
+When migrating from anemic services to rich domain models, start with a **hybrid approach** rather than full domain-driven design:
+
+1. Convert type interfaces to classes with behavior
+2. Add factory methods and domain logic (equality, comparison, transformation)
+3. Keep existing service structure—services use domain classes but remain orchestrators
+4. Later migrate to full DDD (repositories, ports/adapters) when complexity warrants
+
+This provides immediate benefits without architectural risk:
+- Encapsulates behavior where it belongs
+- Simplifies services incrementally
+- Reduces type duplication
+- Gives clear signals for when to advance to DDD
+
+**Don't add collection wrapper classes prematurely:**
+Avoid creating collection wrapper classes (e.g., `Articles` wrapping `Article[]`) until there's proven need. JavaScript arrays have sufficient built-in methods (`.map()`, `.filter()`, `.find()`) for simple cases.
+
+Create collection classes only when you have:
+- Multiple consumers with repeated collection logic
+- Complex operations (pagination, deduplication, grouping, merging)
+- Business rules on collections (read/unread tracking, favorites, pinning)
+- Performance optimizations needed (caching, lazy loading, virtualization)
+
+**Example of premature abstraction (avoid):**
+```typescript
+// ❌ Unnecessary - only 1 consumer, simple operations
+class Articles {
+  static fromRssItems(items: RssItem[]): Articles { ... }
+  getAll(): readonly Article[] { ... }
+  length: number { ... }
+}
+// Adds indirection: articles.getAll()[0] instead of articles[0]
+```
+
+**Merge similar types during domain refactoring:**
+When converting to domain classes, merge semantically similar types by making distinguishing fields optional. Use factory methods to represent different creation contexts instead of separate classes.
+
+**Example:**
+Merged `Feed` (stored in OPML) + `FeedInfo` (fetched from RSS) → single `Feed` class:
+```typescript
+export class Feed {
+  constructor(
+    readonly title: string,
+    readonly feedUrl: string,
+    readonly description: string = '' // Optional - differs between sources
+  ) {}
+
+  // Context-specific factories
+  static fromRssFeed(url: string, rssFeed: RssFeed): Feed { ... }
+  static fromOpmlOutline(outline: OpmlOutline): Feed | null { ... }
+}
+```
+
+Benefits: Eliminates type duplication, single source of truth, factories document context.
+
 ### Function Control Flow Pattern: Result Variable
 
 Structure async functions to always have the return statement at the end, not inside try blocks. Initialize result with safe defaults, then update conditionally on success:
