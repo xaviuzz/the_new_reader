@@ -1,4 +1,5 @@
 import React from 'react'
+import { NavbarBrand } from './NavbarBrand'
 import { NavbarActions } from './NavbarActions'
 
 interface NavbarProps {
@@ -8,9 +9,7 @@ interface NavbarProps {
 export function Navbar({ onAddFeed }: NavbarProps): React.JSX.Element {
   return (
     <div className="navbar bg-base-100 shadow-sm border-b border-base-300">
-      <div className="flex-1">
-        <a className="text-2xl font-bold">The New Reader</a>
-      </div>
+      <NavbarBrand />
       <NavbarActions onAddFeed={onAddFeed} />
     </div>
   )
