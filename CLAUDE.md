@@ -97,6 +97,75 @@ When planning new features or large changes:
 
 ## React Component Patterns
 
+### Component Organization Patterns
+
+**Folder Structure for Related Components:**
+When a component has multiple sub-components, organize them in a folder structure:
+
+```
+components/
+├── navbar/
+│   ├── Navbar.tsx (container)
+│   ├── index.ts (export { Navbar })
+│   └── components/
+│       ├── Brand.tsx (presentational)
+│       ├── Actions.tsx (composite)
+│       ├── AddFeedButton.tsx (button)
+│       └── ThemeSwitcher.tsx (stateful)
+├── sidebar/
+│   ├── Sidebar.tsx
+│   ├── index.ts
+│   └── components/
+│       ├── FeedListItem.tsx
+│       └── EmptyFeedState.tsx
+└── article/
+    ├── ArticleList.tsx
+    ├── index.ts
+    └── components/
+        ├── ArticleCard.tsx
+        └── ArticleCardFooter.tsx
+```
+
+**Benefits:**
+- Logical grouping of related components
+- Clear hierarchy: container → feature components → sub-components
+- Easier to locate component files
+- Mirrors backend service organization patterns
+- Simplifies imports: `import { Navbar } from './components/navbar'`
+
+**When to Extract Components:**
+Extract a component when it:
+1. Has repeated patterns in a map/loop (e.g., FeedListItem in feed list)
+2. Has conditional rendering with distinct UI (e.g., EmptyFeedState)
+3. Is logically independent but used by a parent (e.g., ArticleCardFooter)
+4. Could be reused elsewhere (e.g., AddFeedButton, Brand)
+
+**Use index.ts for Cleaner Imports:**
+Export main components via `index.ts` to simplify imports:
+```typescript
+// Instead of: import { Navbar } from './components/navbar/Navbar'
+// Use: import { Navbar } from './components/navbar'
+```
+
+**Utility Functions Organization:**
+Extract shared utilities to `src/renderer/src/utils/`:
+- `date.ts` - Date formatting functions
+- `string.ts` - String manipulation utilities
+- etc.
+
+Example:
+```typescript
+// src/renderer/src/utils/date.ts
+export function formatDate(date: Date | null): string {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+```
+
 ### Component State Encapsulation
 
 When extracting UI features into React components, encapsulate state management within the component itself:
@@ -450,6 +519,27 @@ try {
 **TypeScript Type Definitions**:
 - `@types/rss-parser` doesn't exist on npm, but rss-parser has built-in TS support
 - `@types/opml` doesn't exist on npm; create custom type declaration file in `src/main/types/opml.d.ts`
+
+## TypeScript Configuration Patterns
+
+### TypeScript Configuration for Nested Components
+
+When creating nested folder structures for components, ensure `tsconfig.json` includes explicit patterns for all file types:
+
+```json
+{
+  "include": [
+    "src/renderer/src/env.d.ts",
+    "src/renderer/src/**/*.ts",      // Explicitly include .ts files
+    "src/renderer/src/**/*.tsx",     // Explicitly include .tsx files
+    "src/preload/*.d.ts"
+  ]
+}
+```
+
+**Why**: Generic patterns like `**/*` may not match all TypeScript variations. Explicit patterns ensure the compiler recognizes all component files.
+
+**Common Issue**: When adding new nested component folders, the TypeScript compiler may report "File not listed within the file list" errors. Update `include` patterns to explicitly list `.ts` and `.tsx` patterns separately.
 
 ## File Operations Best Practices
 
