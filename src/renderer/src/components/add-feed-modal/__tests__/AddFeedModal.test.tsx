@@ -10,16 +10,17 @@ import { AddFeedModal } from '../AddFeedModal'
 describe('AddFeedModal', () => {
   it('should render the modal dialog when open', () => {
     const sut = new AddFeedModalSUT({ isOpen: true })
-    expect(sut.getHeading()).toBeInTheDocument()
+    expect(sut.getModalBox()).toBeInTheDocument()
   })
 
   it('should not render when closed', () => {
     const sut = new AddFeedModalSUT({ isOpen: false })
-    expect(sut.getHeading()).not.toBeInTheDocument()
+    expect(sut.getModalBox()).not.toBeInTheDocument()
   })
 
   it('should render form elements', () => {
     const sut = new AddFeedModalSUT({ isOpen: true })
+    expect(sut.getHeading()).toBeInTheDocument()
     expect(sut.getUrlInput()).toBeInTheDocument()
     expect(sut.getAddButton()).toBeInTheDocument()
     expect(sut.getCancelButton()).toBeInTheDocument()
@@ -77,13 +78,19 @@ describe('AddFeedModal', () => {
       const { isOpen = true, shouldError = false } = options
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      this.onAddFeed = vi.fn(async (url: string) => {
+      this.onAddFeed = vi.fn(async (_url: string) => {
         if (shouldError) {
           throw new Error('Failed to add feed')
         }
       })
       this.onClose = vi.fn()
+      render(
+        <AddFeedModal isOpen={isOpen} onClose={this.onClose} onAddFeed={this.onAddFeed} />
+      )
+    }
 
+    getModalBox(): HTMLElement | null {
+      return screen.queryByRole('heading', { name: 'Add Feed' })?.closest('.modal-box') ?? null
     }
 
     getHeading(): HTMLElement | null {
