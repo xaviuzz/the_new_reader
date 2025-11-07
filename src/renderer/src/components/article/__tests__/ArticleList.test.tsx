@@ -3,26 +3,22 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import type { Article } from '../../../../../main/domain'
 import { ArticleList } from '../ArticleList'
-import { Feed } from '../../../../../main/domain'
 
 describe('ArticleList', () => {
   it('should render content area with correct structure', () => {
     const sut = new ArticleListSUT()
-
     expect(sut.getMainContent()).toBeInTheDocument()
   })
 
-  it('should display feed title when feed provided', () => {
-    const feed = new Feed('Test Feed', 'https://example.com/feed', 'A test feed')
-    const sut = new ArticleListSUT(feed)
-
-    expect(sut.getHeading()).toHaveTextContent('Test Feed')
+  it('should show empty state when no articles', () => {
+    const sut = new ArticleListSUT({ isEmpty: true })
+    expect(sut.getEmptyStateMessage()).toBeInTheDocument()
   })
 
   it('should render articles with proper structure', () => {
     const sut = new ArticleListSUT()
-
     const articles = sut.getArticles()
     expect(articles.length).toBeGreaterThan(0)
 
@@ -34,7 +30,6 @@ describe('ArticleList', () => {
 
   it('should have links with correct attributes for external navigation', () => {
     const sut = new ArticleListSUT()
-
     sut.getLinks().forEach((link) => {
       expect(link).toHaveAttribute('href')
       expect(link).toHaveAttribute('target', '_blank')
@@ -44,27 +39,52 @@ describe('ArticleList', () => {
 
   it('should have correct scrollable and padding classes', () => {
     const sut = new ArticleListSUT()
-
     expect(sut.getMainContent()).toBeInTheDocument()
   })
 
-  it('should not display heading when no feed provided', () => {
-    const sut = new ArticleListSUT()
-
-    expect(sut.getAllHeadings().length).toBe(0)
-  })
-
   class ArticleListSUT {
-    constructor(feed?: Feed) {
-      render(<ArticleList feed={feed} />)
+    articles: Article[]
+
+    constructor(options: { isEmpty?: boolean } = {}) {
+      const { isEmpty = false } = options
+
+      this.articles = [
+        {
+          title: 'Building scalable Node.js applications',
+          link: 'https://example.com/article1',
+          pubDate: new Date('2025-11-01'),
+          description:
+            'Learn best practices for building high-performance Node.js applications with clustering and load balancing.',
+          thumbnail: null
+        },
+        {
+          title: 'React 19: New features and improvements',
+          link: 'https://example.com/article2',
+          pubDate: new Date('2025-10-31'),
+          description:
+            'Explore the latest features in React 19 including improved TypeScript support and better performance optimizations.',
+          thumbnail: null
+        },
+        {
+          title: 'The future of JavaScript frameworks',
+          link: 'https://example.com/article3',
+          pubDate: new Date('2025-10-30'),
+          description:
+            'An in-depth analysis of emerging JavaScript frameworks and their impact on modern web development.',
+          thumbnail: null
+        }
+      ]
+
+      const articlesToRender = isEmpty ? [] : this.articles
+      render(<ArticleList articles={articlesToRender} />)
     }
 
     getMainContent(): HTMLElement | null {
       return screen.getByRole('main')
     }
 
-    getHeading(): HTMLElement | null {
-      return screen.queryByRole('heading', { level: 2 })
+    getEmptyStateMessage(): HTMLElement | null {
+      return screen.queryByText(/no articles available/i)
     }
 
     getArticles(): HTMLElement[] {
@@ -73,10 +93,6 @@ describe('ArticleList', () => {
 
     getLinks(): HTMLElement[] {
       return Array.from(screen.getAllByRole('link'))
-    }
-
-    getAllHeadings(): HTMLElement[] {
-      return Array.from(screen.queryAllByRole('heading', { level: 2 }))
     }
   }
 })
