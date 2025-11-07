@@ -279,6 +279,371 @@ export function AddFeedModal({ isOpen, onClose, onAddFeed }: AddFeedModalProps):
 - Maintainability: Changes to form logic isolated to FeedUrlForm component
 - Clear data flow: `onSuccess` callback makes component contracts explicit
 
+## Modal Pattern
+
+When implementing modals (dialogs for user confirmations, forms, etc.), follow these proven patterns:
+
+### Shared Modal Components
+
+Extract common structural components into a `shared/` folder to avoid duplication across multiple modals:
+
+**Pattern:**
+```
+components/
+├── shared/
+│   ├── ModalHeader.tsx        // Consistent title rendering
+│   ├── ModalBackdrop.tsx       // Click-to-close backdrop
+│   └── index.ts                // Re-export for cleaner imports
+├── add-feed-modal/
+│   ├── AddFeedModal.tsx        // Container component
+│   ├── index.ts
+│   └── components/
+│       ├── FeedUrlForm.tsx
+│       └── ModalActions.tsx    // Modal-specific: Add Feed / Cancel
+├── delete-feed-modal/
+│   ├── DeleteFeedModal.tsx     // Container component
+│   ├── index.ts
+│   └── components/
+│       ├── DeleteConfirmation.tsx
+│       └── DeleteModalActions.tsx
+```
+
+**Shared Components:**
+```typescript
+// ModalHeader - consistent title styling
+export interface ModalHeaderProps {
+  title: string
+}
+
+export function ModalHeader({ title }: ModalHeaderProps): React.JSX.Element {
+  return <h3 className="font-bold text-lg">{title}</h3>
+}
+```
+
+```typescript
+// ModalBackdrop - reusable click-to-close overlay
+export interface ModalBackdropProps {
+  onClick: () => void
+}
+
+export function ModalBackdrop({ onClick }: ModalBackdropProps): React.JSX.Element {
+  return <div className="modal-backdrop" onClick={onClick} />
+}
+```
+
+**Benefits:**
+- Eliminates component duplication across modals
+- Consistent visual structure and styling
+- Single source of truth for modal styling changes
+- Makes modal composition predictable and testable
+
+### DaisyUI Modal Composition Pattern
+
+All modals follow the same structural pattern using DaisyUI classes:
+
+```typescript
+export function DeleteFeedModal({ isOpen, feed, onClose, onDelete }: DeleteFeedModalProps): React.JSX.Element {
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  if (!isOpen || !feed) {
+    return <></>
+  }
+
+  const handleDelete = async (): Promise<void> => {
+    setIsDeleting(true)
+    try {
+      await onDelete(feed)
+      onClose()
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <ModalHeader title="Delete Feed" />
+        <DeleteConfirmation feed={feed} />
+        <DeleteModalActions onCancel={onClose} onDelete={handleDelete} isDeleting={isDeleting} />
+      </div>
+      <ModalBackdrop onClick={onClose} />
+    </div>
+  )
+}
+```
+
+**Structure:**
+- `modal modal-open` - Container that shows the modal (DaisyUI)
+- `modal-box` - Centered content area with consistent styling
+- `ModalHeader` - Title and branding
+- Modal-specific content components (forms, confirmations, lists, etc.)
+- `ModalActions` - Buttons (Cancel, Submit, Delete, etc.)
+- `ModalBackdrop` - Click-outside-to-close overlay
+
+**Benefits:**
+- Consistent modal appearance and behavior
+- Familiar structure makes modals easy to test
+- DaisyUI handles responsive sizing and centering
+
+### Explicit Callback Naming for Modal Triggers
+
+Use `onDeleteRequest` or `onConfirmRequest` (not `onDelete` or `onConfirm`) to clearly signal that the callback opens a modal, not immediately executes an action:
+
+**Pattern:**
+```typescript
+// Parent component (e.g., Sidebar)
+export interface SidebarProps {
+  // ... other props
+  onDeleteRequest?: (feed: Feed) => void  // Signal: opens modal
+}
+
+function Sidebar({ feeds, onDeleteRequest }: SidebarProps): React.JSX.Element {
+  return (
+    <ul>
+      {feeds.map((feed) => (
+        <FeedListItem
+          key={feed.feedUrl}
+          feed={feed}
+          onDeleteRequest={onDeleteRequest}  // Pass through
+        />
+      ))}
+    </ul>
+  )
+}
+
+// Child component (FeedListItem)
+export interface FeedListItemProps {
+  feed: Feed
+  onDeleteRequest?: (feed: Feed) => void  // Just triggers modal
+}
+
+function FeedListItem({ feed, onDeleteRequest }: FeedListItemProps): React.JSX.Element {
+  return (
+    <li>
+      <button onClick={() => onDeleteRequest?.(feed)}>Delete</button>
+    </li>
+  )
+}
+
+// App component - modal handler
+function App(): React.JSX.Element {
+  const [feedToDelete, setFeedToDelete] = useState<Feed | null>(null)
+
+  return (
+    <>
+      <Sidebar onDeleteRequest={setFeedToDelete} />
+      <DeleteFeedModal
+        isOpen={feedToDelete !== null}
+        feed={feedToDelete}
+        onClose={() => setFeedToDelete(null)}
+        onDelete={handleDeleteFeed}  // Callback naming: onDelete = executes action
+      />
+    </>
+  )
+}
+```
+
+**Naming Distinction:**
+- `onDeleteRequest` - Opens modal, sets state (no immediate action)
+- `onDelete` - Executes the actual delete operation (in modal's onDelete handler)
+
+**Benefits:**
+- Clarifies component contracts: "this button opens a modal" vs "this executes the action"
+- Prevents confusion in button click handlers
+- Easier to refactor: adding confirmation logic just changes callback target
+
+### Loading State Management in Modals
+
+Modals manage their own loading state during async operations (`isDeleting`, `isSubmitting`), while parents only manage modal visibility:
+
+**Pattern:**
+```typescript
+export interface DeleteFeedModalProps {
+  isOpen: boolean
+  feed: Feed | null
+  onClose: () => void
+  onDelete: (feed: Feed) => Promise<void>
+}
+
+export function DeleteFeedModal({ isOpen, feed, onClose, onDelete }: DeleteFeedModalProps): React.JSX.Element {
+  // Modal manages its own operation state
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  if (!isOpen || !feed) {
+    return <></>
+  }
+
+  const handleDelete = async (): Promise<void> => {
+    setIsDeleting(true)
+    try {
+      await onDelete(feed)      // Perform async operation
+      onClose()                 // Parent just closes modal
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <ModalHeader title="Delete Feed" />
+        <DeleteConfirmation feed={feed} />
+        {/* Pass isDeleting to action buttons for loading state UI */}
+        <DeleteModalActions
+          onCancel={onClose}
+          onDelete={handleDelete}
+          isDeleting={isDeleting}
+        />
+      </div>
+      <ModalBackdrop onClick={onClose} />
+    </div>
+  )
+}
+```
+
+```typescript
+export interface DeleteModalActionsProps {
+  onCancel: () => void
+  onDelete: () => Promise<void>
+  isDeleting: boolean
+}
+
+export function DeleteModalActions({ onCancel, onDelete, isDeleting }: DeleteModalActionsProps): React.JSX.Element {
+  return (
+    <div className="modal-action">
+      <button
+        onClick={onCancel}
+        className="btn btn-ghost"
+        disabled={isDeleting}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={onDelete}
+        className="btn btn-error"
+        disabled={isDeleting}
+      >
+        {isDeleting ? (
+          <>
+            <span className="loading loading-spinner loading-sm"></span>
+            Deleting...
+          </>
+        ) : (
+          'Delete Feed'
+        )}
+      </button>
+    </div>
+  )
+}
+```
+
+**State Distribution:**
+- Parent: `feedToDelete` (which modal is open)
+- Modal: `isDeleting` (operation in progress)
+- Actions: Use `isDeleting` to disable buttons and show spinner
+
+**Benefits:**
+- Clear separation of concerns: visibility vs operation state
+- Modal operations don't leak into parent state management
+- Easier to test: modal can be tested independently with mocked async operations
+- Prevents accidental modal closure during async operation
+
+### Folder Structure Consistency
+
+Modal components follow the same folder organization pattern for predictability:
+
+```
+modal-name/
+├── ModalName.tsx              // Container: state + event handling
+├── index.ts                   // Re-export for cleaner imports
+└── components/
+    ├── SpecificComponent1.tsx // Modal-specific presentational/form components
+    ├── SpecificComponent2.tsx
+    └── ...
+```
+
+**Container Component (ModalName.tsx):**
+- Manages modal visibility and operation state
+- Handles async operations in try/finally blocks
+- Renders shared components + modal-specific components
+- Responsible for error handling and callbacks
+
+**Modal-Specific Components (components/ folder):**
+- UI concerns specific to this modal (forms, confirmations, lists)
+- Receive data and callbacks from container
+- Don't import or depend on other modal folders
+- Can reference shared/ components if needed
+
+**Example - DeleteFeedModal structure:**
+```
+delete-feed-modal/
+├── DeleteFeedModal.tsx            // Container: manages isDeleting, calls onDelete
+├── index.ts                       // export { DeleteFeedModal }
+└── components/
+    ├── DeleteConfirmation.tsx     // Shows feed title and warning message
+    └── DeleteModalActions.tsx     // Buttons: Cancel / Delete Feed
+```
+
+**Example - AddFeedModal structure:**
+```
+add-feed-modal/
+├── AddFeedModal.tsx               // Container: manages modal visibility
+├── index.ts                       // export { AddFeedModal }
+└── components/
+    ├── FeedUrlForm.tsx            // Form input + submit logic
+    └── ModalActions.tsx           // Buttons: Cancel / Add Feed
+```
+
+**Benefits:**
+- Consistent navigation: developers know where to find components
+- Clear component responsibilities
+- Mirrors the service architecture pattern (container + helpers)
+- Easier refactoring: moving components within same folder doesn't break imports
+
+### Component Cleanup: Remove Unused Duplicates
+
+During refactoring, delete unused duplicate files that remain from previous implementations:
+
+**Scenario - Component Extraction:**
+When extracting `ModalHeader` and `ModalBackdrop` to `shared/`, the `AddFeedModal` component folder originally had local copies:
+
+```
+add-feed-modal/
+├── AddFeedModal.tsx
+├── ModalHeader.tsx          # ❌ Duplicate - now in shared/
+├── ModalBackdrop.tsx        # ❌ Duplicate - now in shared/
+├── ModalActions.tsx         # ✅ Keep - unique to AddFeedModal
+└── components/
+    └── FeedUrlForm.tsx
+```
+
+**Action - Delete duplicates:**
+```bash
+rm src/renderer/src/components/add-feed-modal/ModalHeader.tsx
+rm src/renderer/src/components/add-feed-modal/ModalBackdrop.tsx
+```
+
+Then verify AddFeedModal imports from shared:
+```typescript
+import { ModalHeader, ModalBackdrop } from '../shared'
+```
+
+**Why Delete Duplicates:**
+- Prevents confusion: developers might edit the wrong version
+- Maintains single source of truth: changes to modal structure apply everywhere
+- Reduces maintenance burden: fewer files to update
+- Avoids divergence: duplicate implementations can drift out of sync
+
+**How to Spot Candidates:**
+- Search for identical component implementations across folders
+- Check if multiple modals import the same component differently (e.g., one from shared, one local)
+- Use diff tools: `diff add-feed-modal/ModalHeader.tsx shared/ModalHeader.tsx`
+
+**Benefits:**
+- Cleaner codebase structure
+- Forces intentional component sharing through shared/ folder
+- Makes refactoring safer: can't accidentally miss a duplicate
+
 ## Service Architecture Patterns
 
 ### Class-Based Services for Stateful Operations
