@@ -14,23 +14,28 @@ vi.mock('electron', () => ({
 
 describe('IPC Feed Handlers', () => {
   let testDataDir: string
+  let cacheDir: string
 
   beforeAll(() => {
     testDataDir = join(tmpdir(), 'feeds-test-' + Date.now())
     if (!existsSync(testDataDir)) {
       mkdirSync(testDataDir, { recursive: true })
     }
+    cacheDir = join(testDataDir, 'cache')
+    if (!existsSync(cacheDir)) {
+      mkdirSync(cacheDir, { recursive: true })
+    }
   })
 
   describe('setupFeedHandlers', () => {
     it('should initialize without throwing', () => {
       const opmlFilePath = join(testDataDir, 'feeds.opml')
-      expect(() => setupFeedHandlers(opmlFilePath)).not.toThrow()
+      expect(() => setupFeedHandlers(opmlFilePath, cacheDir)).not.toThrow()
     })
 
     it('should handle feed operations', async () => {
       const opmlFilePath = join(testDataDir, 'feeds-2.opml')
-      expect(() => setupFeedHandlers(opmlFilePath)).not.toThrow()
+      expect(() => setupFeedHandlers(opmlFilePath, cacheDir)).not.toThrow()
     })
   })
 })

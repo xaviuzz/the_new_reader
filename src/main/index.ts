@@ -1,8 +1,33 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { mkdirSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { setupFeedHandlers } from './ipc/feeds'
+import { OpmlService } from './services/opml'
+import { ipcMain } from 'electron'
+
+async function prefetchAllFeeds(opmlFilePath: string): Promise<void> {
+  setImmediate(async () => {
+    try {
+      const opmlService = new OpmlService(opmlFilePath)
+      const feeds = opmlService.getFeeds()
+
+      const results = await Promise.allSettled(
+        feeds.map((feed) => ipcMain.invoke('feeds:getArticles', feed.feedUrl))
+      )
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const feed = feeds[index]
+          console.error(`Failed to prefetch feed ${feed.feedUrl}:`, result.reason)
+        }
+      })
+    } catch (error) {
+      console.error('Failed to prefetch feeds:', error)
+    }
+  })
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -43,9 +68,16 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
+  // Initialize cache directory
+  const cacheDir = join(app.getPath('userData'), 'cache')
+  mkdirSync(cacheDir, { recursive: true })
+
   // Initialize IPC handlers
   const opmlFilePath = join(app.getPath('userData'), 'feeds.opml')
-  setupFeedHandlers(opmlFilePath)
+  setupFeedHandlers(opmlFilePath, cacheDir)
+
+  // Prefetch all feeds on startup
+  prefetchAllFeeds(opmlFilePath)
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

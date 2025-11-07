@@ -3,7 +3,12 @@ import { Article, Feed } from '../domain'
 import type { RssFeed, RssItem } from '../types/rss'
 import { FetchFailedError } from '../types/errors'
 
-export class RssService {
+export interface IRssService {
+  validateAndFetchFeed(url: string, parser?: Parser): Promise<Feed>
+  fetchArticles(feedUrl: string, parser?: Parser): Promise<Article[]>
+}
+
+export class RssService implements IRssService {
   async validateAndFetchFeed(url: string, parser?: Parser): Promise<Feed> {
     const rssParser = parser || new Parser()
 
