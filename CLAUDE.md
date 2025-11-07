@@ -201,6 +201,84 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps): React.JSX.
 }
 ```
 
+### Component Composition Strategy
+
+When a component has multiple distinct responsibilities or complex logic, break it into 4-5 focused sub-components using a `components/` subfolder (following the navbar/sidebar pattern). This improves maintainability, testability, and reusability.
+
+**When to componentize:**
+- Component has 100+ lines with multiple logical sections
+- Complex logic (form handling, state management) mixed with presentation
+- UI sections that could be reused in other components
+- Business logic that should be isolated from presentational markup
+
+**Pattern - Moderate granularity with form component:**
+```
+add-feed-modal/
+├── AddFeedModal.tsx (container - coordinates child components)
+├── components/
+│   ├── ModalHeader.tsx (presentational - title only)
+│   ├── FeedUrlForm.tsx (stateful - encapsulates form logic with onSuccess callback)
+│   ├── ModalActions.tsx (composite - button group)
+│   └── ModalBackdrop.tsx (presentational - dismissible backdrop)
+└── __tests__/
+    └── AddFeedModal.test.tsx
+```
+
+**Form Component with Success Callback Pattern:**
+When a form component successfully submits, it should call an optional `onSuccess` callback to signal completion:
+
+```typescript
+interface FeedUrlFormProps {
+  onSubmit: (url: string) => Promise<void>
+  onSuccess?: () => void  // Called after successful submission
+}
+
+export function FeedUrlForm({ onSubmit, onSuccess }: FeedUrlFormProps): React.JSX.Element {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    const url = inputRef.current?.value.trim()
+
+    if (!url) return
+
+    try {
+      await onSubmit(url)
+      if (inputRef.current) inputRef.current.value = ''
+      onSuccess?.()  // Signal completion to parent
+    } catch (error) {
+      console.error('Failed to add feed:', error)
+    }
+  }
+  // ...
+}
+```
+
+**Container coordinates components:**
+```typescript
+export function AddFeedModal({ isOpen, onClose, onAddFeed }: AddFeedModalProps): React.JSX.Element {
+  if (!isOpen) return <></>
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <ModalHeader title="Add Feed" />
+        <FeedUrlForm onSubmit={onAddFeed} onSuccess={onClose} />
+        <ModalActions onCancel={onClose} />
+      </div>
+      <ModalBackdrop onClick={onClose} />
+    </div>
+  )
+}
+```
+
+**Benefits:**
+- Single Responsibility: Each component has one clear job
+- Reusability: ModalHeader, ModalActions, ModalBackdrop can be reused for other modals
+- Testability: Easier to test components in isolation with mocked children
+- Maintainability: Changes to form logic isolated to FeedUrlForm component
+- Clear data flow: `onSuccess` callback makes component contracts explicit
+
 ## Service Architecture Patterns
 
 ### Class-Based Services for Stateful Operations
@@ -545,6 +623,50 @@ describe('Navbar', () => {
 - Mocks centralized in constructor
 - Easy to refactor component internals without changing test assertions
 
+**SUT Constructor Options for Test Scenarios:**
+Use constructor options to configure different test scenarios without creating separate SUT classes:
+
+```typescript
+class AddFeedModalSUT {
+  onAddFeed: MockedFunction<(url: string) => Promise<void>>
+  onClose: MockedFunction<() => void>
+
+  constructor(options: { isOpen?: boolean; shouldError?: boolean } = {}) {
+    const { isOpen = true, shouldError = false } = options
+
+    this.onAddFeed = vi.fn(async (_url: string) => {
+      if (shouldError) {
+        throw new Error('Failed to add feed')
+      }
+    })
+    this.onClose = vi.fn()
+    render(
+      <AddFeedModal isOpen={isOpen} onClose={this.onClose} onAddFeed={this.onAddFeed} />
+    )
+  }
+  // ... query and action methods
+}
+```
+
+**Usage:**
+```typescript
+it('should render when open', () => {
+  const sut = new AddFeedModalSUT({ isOpen: true })
+  expect(sut.getHeading()).toBeInTheDocument()
+})
+
+it('should handle errors', async () => {
+  const sut = new AddFeedModalSUT({ shouldError: true })
+  // ... test error handling
+})
+```
+
+**Benefits:**
+- Reusable SUT for multiple test scenarios
+- Constructor options make test intent clear
+- No duplication of mock setup across multiple SUT classes
+- Easy to add new scenarios by extending options object
+
 ### Role-Based Queries Over CSS Selectors
 
 Always use ARIA roles (`getByRole`, `getAllByRole`) instead of CSS selectors (`querySelector`, `querySelectorAll`). Tests become resilient to styling changes and match how accessible users interact with components.
@@ -675,6 +797,31 @@ class ArticleListSUT {
 - Type safety (null checks built-in)
 - Self-documenting method names
 - Easy to compose complex interactions
+
+### Test Script Configuration for Non-Watch Mode
+
+Configure npm test script to run in non-watch mode to prevent hanging test processes in automated environments:
+
+**Configuration:**
+```json
+// package.json
+{
+  "scripts": {
+    "test": "vitest --run"
+  }
+}
+```
+
+**Why:**
+- Prevents tests from staying in watch mode waiting for file changes
+- Essential for CI/CD pipelines and automated test execution
+- Ensures test processes complete and exit cleanly
+- Without `--run`, tests may hang indefinitely if run in non-interactive environments
+
+**Usage:**
+```bash
+npm test  # Runs tests once and exits
+```
 
 ## The New Reader - RSS Feed Application
 
