@@ -8,7 +8,8 @@ const api = {
   listFeeds: (): Promise<Feed[]> => ipcRenderer.invoke('feeds:list'),
   getArticles: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:getArticles', feedUrl),
   deleteFeed: (feedUrl: string): Promise<void> => ipcRenderer.invoke('feeds:delete', feedUrl),
-  refreshFeed: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:refresh', feedUrl)
+  refreshFeed: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:refresh', feedUrl),
+  openExternalLink: (url: string): Promise<void> => ipcRenderer.invoke('app:openExternalLink', url)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

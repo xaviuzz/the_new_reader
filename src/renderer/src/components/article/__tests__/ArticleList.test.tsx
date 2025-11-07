@@ -1,12 +1,19 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import type { Article } from '../../../../../main/domain'
 import { ArticleList } from '../ArticleList'
 
 describe('ArticleList', () => {
+  beforeEach(() => {
+    // Mock window.api.openExternalLink
+    window.api = {
+      ...window.api,
+      openExternalLink: vi.fn()
+    }
+  })
   it('should render content area with correct structure', () => {
     const sut = new ArticleListSUT()
     expect(sut.getMainContent()).toBeInTheDocument()

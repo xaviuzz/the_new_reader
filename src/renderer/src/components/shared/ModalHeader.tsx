@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface ModalHeaderProps {
+export interface ModalHeaderProps {
   title: string
 }
 

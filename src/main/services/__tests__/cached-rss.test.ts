@@ -120,6 +120,7 @@ describe('CachedRssService', () => {
 
     vi.advanceTimersByTime(61 * 60 * 1000)
 
+    // @ts-ignore - newCachedService is used to trigger cleanup in constructor
     const newCachedService = new CachedRssService(mockRssService, cacheDir, 60)
 
     const files = readdirSync(cacheDir)

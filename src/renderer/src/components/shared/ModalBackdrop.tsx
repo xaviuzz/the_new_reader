@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface ModalBackdropProps {
+export interface ModalBackdropProps {
   onClick: () => void
 }
 
