@@ -76,16 +76,14 @@ describe('AddFeedModal', () => {
     constructor(options: { isOpen?: boolean; shouldError?: boolean } = {}) {
       const { isOpen = true, shouldError = false } = options
 
-      this.onAddFeed = vi.fn(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      this.onAddFeed = vi.fn(async (url: string) => {
         if (shouldError) {
           throw new Error('Failed to add feed')
         }
       })
       this.onClose = vi.fn()
 
-      render(
-        <AddFeedModal isOpen={isOpen} onClose={this.onClose} onAddFeed={this.onAddFeed} />
-      )
     }
 
     getHeading(): HTMLElement | null {
