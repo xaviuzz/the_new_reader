@@ -31,4 +31,8 @@ export class CachedRssService implements IRssService {
 
     return articles
   }
+
+  clearCache(feedUrl: string): void {
+    this.cacheStorage.delete(feedUrl)
+  }
 }

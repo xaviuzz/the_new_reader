@@ -175,6 +175,45 @@ describe('OPML Service', () => {
     })
   })
 
+  describe('deleteFeed', () => {
+    it('should delete feed by URL', () => {
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      const feed2: Feed = new Feed('Feed 2', 'https://example.com/2.xml')
+
+      opmlService.addFeed(feed1)
+      opmlService.addFeed(feed2)
+
+      opmlService.deleteFeed('https://example.com/1.xml')
+
+      const feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(1)
+      expect(feeds[0]).toEqual(feed2)
+    })
+
+    it('should throw error when deleting non-existent feed', () => {
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      opmlService.addFeed(feed1)
+
+      expect(() => opmlService.deleteFeed('https://example.com/nonexistent.xml')).toThrow(
+        'Feed with URL https://example.com/nonexistent.xml not found'
+      )
+
+      const feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(1)
+    })
+
+    it('should delete last feed and leave empty file', () => {
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      opmlService.addFeed(feed1)
+
+      opmlService.deleteFeed('https://example.com/1.xml')
+
+      const feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(0)
+      expect(fs.existsSync(testFilePath)).toBe(true)
+    })
+  })
+
   describe('Multiple operations', () => {
     it('should handle multiple add and read operations correctly', () => {
       const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
@@ -196,6 +235,25 @@ describe('OPML Service', () => {
       expect(() => opmlService.addFeed(feed1)).toThrow(FeedAlreadyExistsError)
       feeds = opmlService.getFeeds()
       expect(feeds).toHaveLength(3)
+    })
+
+    it('should handle add, delete, and add operations', () => {
+      const feed1: Feed = new Feed('Feed 1', 'https://example.com/1.xml')
+      const feed2: Feed = new Feed('Feed 2', 'https://example.com/2.xml')
+
+      opmlService.addFeed(feed1)
+      opmlService.addFeed(feed2)
+
+      let feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(2)
+
+      opmlService.deleteFeed('https://example.com/1.xml')
+      feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(1)
+
+      opmlService.addFeed(feed1)
+      feeds = opmlService.getFeeds()
+      expect(feeds).toHaveLength(2)
     })
   })
 })

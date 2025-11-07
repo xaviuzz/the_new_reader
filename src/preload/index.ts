@@ -6,7 +6,9 @@ import type { Feed, Article } from '../main/domain'
 const api = {
   addFeed: (url: string): Promise<Feed> => ipcRenderer.invoke('feeds:add', url),
   listFeeds: (): Promise<Feed[]> => ipcRenderer.invoke('feeds:list'),
-  getArticles: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:getArticles', feedUrl)
+  getArticles: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:getArticles', feedUrl),
+  deleteFeed: (feedUrl: string): Promise<void> => ipcRenderer.invoke('feeds:delete', feedUrl),
+  refreshFeed: (feedUrl: string): Promise<Article[]> => ipcRenderer.invoke('feeds:refresh', feedUrl)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

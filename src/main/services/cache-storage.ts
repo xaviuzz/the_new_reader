@@ -99,4 +99,16 @@ export class CacheStorage {
       console.error('Failed to clear cache:', error)
     }
   }
+
+  delete(feedUrl: string): void {
+    const filePath = this.getCacheFilePath(feedUrl)
+
+    try {
+      if (statSync(filePath)) {
+        unlinkSync(filePath)
+      }
+    } catch {
+      // File doesn't exist, which is fine
+    }
+  }
 }

@@ -21,4 +21,14 @@ export function setupFeedHandlers(opmlFilePath: string, cacheDir: string): void 
   ipcMain.handle('feeds:getArticles', async (_event, feedUrl: string) => {
     return await rssService.fetchArticles(feedUrl)
   })
+
+  ipcMain.handle('feeds:delete', async (_event, feedUrl: string) => {
+    opmlService.deleteFeed(feedUrl)
+    rssService.clearCache(feedUrl)
+  })
+
+  ipcMain.handle('feeds:refresh', async (_event, feedUrl: string) => {
+    rssService.clearCache(feedUrl)
+    return await rssService.fetchArticles(feedUrl)
+  })
 }

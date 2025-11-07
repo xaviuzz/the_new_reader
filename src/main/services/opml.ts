@@ -113,4 +113,15 @@ export class OpmlService {
   getFeeds(): Feed[] {
     return this.readOpmlFile()
   }
+
+  deleteFeed(feedUrl: string): void {
+    const existingFeeds = this.readOpmlFile()
+    const updatedFeeds = existingFeeds.filter((feed) => feed.feedUrl !== feedUrl)
+
+    if (updatedFeeds.length === existingFeeds.length) {
+      throw new Error(`Feed with URL ${feedUrl} not found`)
+    }
+
+    this.writeOpmlFile(updatedFeeds)
+  }
 }
