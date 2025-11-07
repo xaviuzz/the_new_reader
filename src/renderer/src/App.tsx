@@ -4,6 +4,7 @@ import { Navbar } from './components/navbar'
 import { Sidebar } from './components/sidebar'
 import { ArticleList } from './components/article'
 import { AddFeedModal } from './components/add-feed-modal'
+import { DeleteFeedModal } from './components/delete-feed-modal'
 import { ToastContainer, useToast } from './components/toast'
 
 function AppContent(): React.JSX.Element {
@@ -11,6 +12,7 @@ function AppContent(): React.JSX.Element {
   const [selectedFeed, setSelectedFeed] = useState<Feed | undefined>()
   const [articles, setArticles] = useState<Article[]>([])
   const [isAddFeedModalOpen, setIsAddFeedModalOpen] = useState(false)
+  const [feedToDelete, setFeedToDelete] = useState<Feed | null>(null)
   const [isLoadingFeeds, setIsLoadingFeeds] = useState(false)
   const [isLoadingArticles, setIsLoadingArticles] = useState(false)
   const [feedsError, setFeedsError] = useState<string | null>(null)
@@ -84,6 +86,7 @@ function AppContent(): React.JSX.Element {
         setSelectedFeed(undefined)
       }
       await loadFeeds()
+      setFeedToDelete(null)
       showToast('Feed deleted successfully', 'success')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete feed'
@@ -146,7 +149,7 @@ function AppContent(): React.JSX.Element {
           feeds={feeds}
           selectedFeed={selectedFeed}
           onSelectFeed={setSelectedFeed}
-          onDeleteFeed={handleDeleteFeed}
+          onDeleteRequest={setFeedToDelete}
           isLoading={isLoadingFeeds}
           error={feedsError}
         />
@@ -161,6 +164,12 @@ function AppContent(): React.JSX.Element {
         isOpen={isAddFeedModalOpen}
         onClose={() => setIsAddFeedModalOpen(false)}
         onAddFeed={handleAddFeed}
+      />
+      <DeleteFeedModal
+        isOpen={feedToDelete !== null}
+        feed={feedToDelete}
+        onClose={() => setFeedToDelete(null)}
+        onDelete={handleDeleteFeed}
       />
     </div>
   )

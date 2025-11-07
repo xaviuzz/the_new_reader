@@ -1,31 +1,19 @@
-import React, { useState } from 'react'
+import React from 'react'
 import type { Feed } from '../../../../../main/domain'
 
 interface FeedListItemProps {
   feed: Feed
   isSelected: boolean
   onSelect: (feed: Feed) => void
-  onDelete?: (feed: Feed) => Promise<void>
+  onDeleteRequest?: (feed: Feed) => void
 }
 
-export function FeedListItem({ feed, isSelected, onSelect, onDelete }: FeedListItemProps): React.JSX.Element {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleDelete = async (e: React.MouseEvent): Promise<void> => {
+export function FeedListItem({ feed, isSelected, onSelect, onDeleteRequest }: FeedListItemProps): React.JSX.Element {
+  const handleDelete = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
-    if (!onDelete) return
-
-    if (!window.confirm(`Delete feed "${feed.title}"?`)) {
-      return
-    }
-
-    setIsDeleting(true)
-    try {
-      await onDelete(feed)
-    } finally {
-      setIsDeleting(false)
-    }
+    if (!onDeleteRequest) return
+    onDeleteRequest(feed)
   }
 
   return (
@@ -41,14 +29,9 @@ export function FeedListItem({ feed, isSelected, onSelect, onDelete }: FeedListI
         >
           <span className="truncate">{feed.title}</span>
         </a>
-        {onDelete && (
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="btn btn-ghost btn-xs"
-            title="Delete feed"
-          >
-            {isDeleting ? <span className="loading loading-spinner loading-xs"></span> : '✕'}
+        {onDeleteRequest && (
+          <button onClick={handleDelete} className="btn btn-ghost btn-xs" title="Delete feed">
+            ✕
           </button>
         )}
       </div>

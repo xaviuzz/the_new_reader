@@ -7,7 +7,7 @@ interface SidebarProps {
   feeds: Feed[]
   selectedFeed?: Feed
   onSelectFeed: (feed: Feed) => void
-  onDeleteFeed?: (feed: Feed) => Promise<void>
+  onDeleteRequest?: (feed: Feed) => void
   isLoading?: boolean
   error?: string | null
 }
@@ -16,7 +16,7 @@ export function Sidebar({
   feeds,
   selectedFeed,
   onSelectFeed,
-  onDeleteFeed,
+  onDeleteRequest,
   isLoading = false,
   error = null
 }: SidebarProps): React.JSX.Element {
@@ -43,7 +43,7 @@ export function Sidebar({
                 feed={feed}
                 isSelected={selectedFeed?.feedUrl === feed.feedUrl}
                 onSelect={onSelectFeed}
-                onDelete={onDeleteFeed}
+                onDeleteRequest={onDeleteRequest}
               />
             ))}
           </ul>

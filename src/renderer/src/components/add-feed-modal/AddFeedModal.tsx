@@ -1,8 +1,7 @@
 import React from 'react'
-import { ModalHeader } from './components/ModalHeader'
+import { ModalHeader, ModalBackdrop } from '../shared'
 import { FeedUrlForm } from './components/FeedUrlForm'
 import { ModalActions } from './components/ModalActions'
-import { ModalBackdrop } from './components/ModalBackdrop'
 
 export interface AddFeedModalProps {
   isOpen: boolean
