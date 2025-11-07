@@ -4,12 +4,18 @@ import { Navbar } from './components/navbar'
 import { Sidebar } from './components/sidebar'
 import { ArticleList } from './components/article'
 import { AddFeedModal } from './components/add-feed-modal'
+import { ToastContainer, useToast } from './components/toast'
 
-function App(): React.JSX.Element {
+function AppContent(): React.JSX.Element {
   const [feeds, setFeeds] = useState<Feed[]>([])
   const [selectedFeed, setSelectedFeed] = useState<Feed | undefined>()
   const [articles, setArticles] = useState<Article[]>([])
   const [isAddFeedModalOpen, setIsAddFeedModalOpen] = useState(false)
+  const [isLoadingFeeds, setIsLoadingFeeds] = useState(false)
+  const [isLoadingArticles, setIsLoadingArticles] = useState(false)
+  const [feedsError, setFeedsError] = useState<string | null>(null)
+  const [articlesError, setArticlesError] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     loadFeeds()
@@ -20,10 +26,13 @@ function App(): React.JSX.Element {
       loadArticles(selectedFeed.feedUrl)
     } else {
       setArticles([])
+      setArticlesError(null)
     }
   }, [selectedFeed])
 
   const loadFeeds = async (): Promise<void> => {
+    setIsLoadingFeeds(true)
+    setFeedsError(null)
     try {
       const loadedFeeds = await window.api.listFeeds()
       setFeeds(loadedFeeds)
@@ -31,17 +40,27 @@ function App(): React.JSX.Element {
         setSelectedFeed(loadedFeeds[0])
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load feeds'
+      setFeedsError(message)
       console.error('Failed to load feeds:', error)
+    } finally {
+      setIsLoadingFeeds(false)
     }
   }
 
   const loadArticles = async (feedUrl: string): Promise<void> => {
+    setIsLoadingArticles(true)
+    setArticlesError(null)
     try {
       const loadedArticles = await window.api.getArticles(feedUrl)
       setArticles(loadedArticles)
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load articles'
+      setArticlesError(message)
       console.error('Failed to load articles:', error)
       setArticles([])
+    } finally {
+      setIsLoadingArticles(false)
     }
   }
 
@@ -50,18 +69,93 @@ function App(): React.JSX.Element {
       await window.api.addFeed(feedUrl)
       await loadFeeds()
       setIsAddFeedModalOpen(false)
+      showToast('Feed added successfully', 'success')
     } catch (error) {
-      console.error('Failed to add feed:', error)
+      const message = error instanceof Error ? error.message : 'Failed to add feed'
+      showToast(message, 'error')
       throw error
+    }
+  }
+
+  const handleDeleteFeed = async (feed: Feed): Promise<void> => {
+    try {
+      await window.api.deleteFeed(feed.feedUrl)
+      if (selectedFeed?.feedUrl === feed.feedUrl) {
+        setSelectedFeed(undefined)
+      }
+      await loadFeeds()
+      showToast('Feed deleted successfully', 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete feed'
+      showToast(message, 'error')
+      console.error('Failed to delete feed:', error)
+    }
+  }
+
+  const handleRefreshFeed = async (feedUrl: string): Promise<void> => {
+    setIsLoadingArticles(true)
+    setArticlesError(null)
+    try {
+      const freshArticles = await window.api.refreshFeed(feedUrl)
+      setArticles(freshArticles)
+      showToast('Feed refreshed', 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to refresh feed'
+      setArticlesError(message)
+      showToast(message, 'error')
+      console.error('Failed to refresh feed:', error)
+    } finally {
+      setIsLoadingArticles(false)
+    }
+  }
+
+  const handleRefreshAll = async (): Promise<void> => {
+    setIsLoadingArticles(true)
+    setArticlesError(null)
+    try {
+      const results = await Promise.allSettled(
+        feeds.map((feed) => window.api.refreshFeed(feed.feedUrl))
+      )
+
+      const failed = results.filter((r) => r.status === 'rejected').length
+      if (failed === 0) {
+        showToast('All feeds refreshed', 'success')
+        if (selectedFeed) {
+          await loadArticles(selectedFeed.feedUrl)
+        }
+      } else {
+        showToast(`Refreshed with ${failed} failures`, 'info')
+        if (selectedFeed) {
+          await loadArticles(selectedFeed.feedUrl)
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to refresh feeds'
+      showToast(message, 'error')
+      console.error('Failed to refresh all feeds:', error)
+    } finally {
+      setIsLoadingArticles(false)
     }
   }
 
   return (
     <div className="flex h-screen flex-col bg-base-100 text-base-content">
-      <Navbar onAddFeed={() => setIsAddFeedModalOpen(true)} />
+      <Navbar onAddFeed={() => setIsAddFeedModalOpen(true)} onRefreshAll={handleRefreshAll} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar feeds={feeds} selectedFeed={selectedFeed} onSelectFeed={setSelectedFeed} />
-        <ArticleList articles={articles} />
+        <Sidebar
+          feeds={feeds}
+          selectedFeed={selectedFeed}
+          onSelectFeed={setSelectedFeed}
+          onDeleteFeed={handleDeleteFeed}
+          isLoading={isLoadingFeeds}
+          error={feedsError}
+        />
+        <ArticleList
+          articles={articles}
+          isLoading={isLoadingArticles}
+          error={articlesError}
+          onRefresh={selectedFeed ? () => handleRefreshFeed(selectedFeed.feedUrl) : undefined}
+        />
       </div>
       <AddFeedModal
         isOpen={isAddFeedModalOpen}
@@ -69,6 +163,14 @@ function App(): React.JSX.Element {
         onAddFeed={handleAddFeed}
       />
     </div>
+  )
+}
+
+function App(): React.JSX.Element {
+  return (
+    <ToastContainer>
+      <AppContent />
+    </ToastContainer>
   )
 }
 
