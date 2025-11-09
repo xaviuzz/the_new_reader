@@ -14,6 +14,7 @@ class MockRssService implements IRssService {
     return new Feed('Test Feed', url, 'Test Description')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async fetchArticles(_feedUrl: string): Promise<Article[]> {
     this.callCount++
     return [
@@ -120,8 +121,8 @@ describe('CachedRssService', () => {
 
     vi.advanceTimersByTime(61 * 60 * 1000)
 
-    // @ts-ignore - newCachedService is used to trigger cleanup in constructor
-    const newCachedService = new CachedRssService(mockRssService, cacheDir, 60)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _newCachedService = new CachedRssService(mockRssService, cacheDir, 60)
 
     const files = readdirSync(cacheDir)
     expect(files.length).toBe(0)

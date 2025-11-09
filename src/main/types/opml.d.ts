@@ -5,7 +5,7 @@ declare module 'opml' {
     dateModified?: string
     ownerName?: string
     ownerEmail?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 
   interface OpmlOutline {
@@ -14,7 +14,7 @@ declare module 'opml' {
     xmlUrl?: string
     htmlUrl?: string
     title?: string
-    [key: string]: any
+    [key: string]: unknown
     subs?: OpmlOutline[]
   }
 
@@ -27,6 +27,12 @@ declare module 'opml' {
     }
   }
 
-  export function parse(opmlText: string, callback: (err: Error | null, result?: OpmlStructure) => void): void
-  export function stringify(opmlObject: OpmlStructure, callback: (err: Error | null, result?: string) => void): void
+  export function parse(
+    opmlText: string,
+    callback: (err: Error | null, result?: OpmlStructure) => void
+  ): void
+  export function stringify(
+    opmlObject: OpmlStructure,
+    callback: (err: Error | null, result?: string) => void
+  ): void
 }

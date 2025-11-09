@@ -1,17 +1,12 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Toast, type ToastType } from './Toast'
+import { ToastContext } from './ToastContext'
 
 export interface ToastMessage {
   id: string
   message: string
   type: ToastType
 }
-
-export interface ToastContextType {
-  showToast: (message: string, type: ToastType) => void
-}
-
-export const ToastContext = React.createContext<ToastContextType | null>(null)
 
 export interface ToastContainerProps {
   children: React.ReactNode
@@ -45,12 +40,4 @@ export function ToastContainer({ children }: ToastContainerProps): React.JSX.Ele
       </div>
     </ToastContext.Provider>
   )
-}
-
-export function useToast(): ToastContextType {
-  const context = React.useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToast must be used within ToastContainer')
-  }
-  return context
 }

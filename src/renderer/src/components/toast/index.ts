@@ -1,2 +1,4 @@
 export { Toast, type ToastProps, type ToastType } from './Toast'
-export { ToastContainer, ToastContext, useToast, type ToastContextType, type ToastMessage } from './ToastContainer'
+export { ToastContainer, type ToastMessage } from './ToastContainer'
+export { ToastContext, type ToastContextType } from './ToastContext'
+export { useToast } from './useToast'

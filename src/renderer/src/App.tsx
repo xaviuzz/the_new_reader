@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import type { Feed, Article } from '../../main/domain'
 import { Navbar } from './components/navbar'
 import { Sidebar } from './components/sidebar'
@@ -19,20 +19,7 @@ function AppContent(): React.JSX.Element {
   const [articlesError, setArticlesError] = useState<string | null>(null)
   const { showToast } = useToast()
 
-  useEffect(() => {
-    loadFeeds()
-  }, [])
-
-  useEffect(() => {
-    if (selectedFeed) {
-      loadArticles(selectedFeed.feedUrl)
-    } else {
-      setArticles([])
-      setArticlesError(null)
-    }
-  }, [selectedFeed])
-
-  const loadFeeds = async (): Promise<void> => {
+  const loadFeeds = useCallback(async (): Promise<void> => {
     setIsLoadingFeeds(true)
     setFeedsError(null)
     try {
@@ -48,7 +35,20 @@ function AppContent(): React.JSX.Element {
     } finally {
       setIsLoadingFeeds(false)
     }
-  }
+  }, [selectedFeed])
+
+  useEffect(() => {
+    loadFeeds()
+  }, [loadFeeds])
+
+  useEffect(() => {
+    if (selectedFeed) {
+      loadArticles(selectedFeed.feedUrl)
+    } else {
+      setArticles([])
+      setArticlesError(null)
+    }
+  }, [selectedFeed])
 
   const loadArticles = async (feedUrl: string): Promise<void> => {
     setIsLoadingArticles(true)

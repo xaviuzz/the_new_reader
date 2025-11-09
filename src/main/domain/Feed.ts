@@ -1,4 +1,5 @@
 import type { RssFeed } from '../types/rss'
+import type { OpmlOutline } from '../types/opml'
 
 export class Feed {
   constructor(
@@ -11,7 +12,7 @@ export class Feed {
     return this.feedUrl === other.feedUrl
   }
 
-  toOpmlOutline() {
+  toOpmlOutline(): OpmlOutline {
     return {
       text: this.title,
       title: this.title,
@@ -22,22 +23,14 @@ export class Feed {
   }
 
   static fromRssFeed(url: string, rssFeed: RssFeed): Feed {
-    return new Feed(
-      rssFeed.title || 'Untitled Feed',
-      url,
-      rssFeed.description || ''
-    )
+    return new Feed(rssFeed.title || 'Untitled Feed', url, rssFeed.description || '')
   }
 
-  static fromOpmlOutline(outline: any): Feed | null {
+  static fromOpmlOutline(outline: OpmlOutline): Feed | null {
     if (!outline.xmlUrl) {
       return null
     }
 
-    return new Feed(
-      outline.title || outline.text || outline.xmlUrl,
-      outline.xmlUrl,
-      ''
-    )
+    return new Feed(outline.title || outline.text || outline.xmlUrl, outline.xmlUrl, '')
   }
 }

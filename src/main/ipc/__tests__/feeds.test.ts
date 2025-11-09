@@ -6,7 +6,8 @@ import { setupFeedHandlers } from '../feeds'
 
 vi.mock('electron', () => ({
   ipcMain: {
-    handle: vi.fn((channel: string, _handler: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    handle: vi.fn((channel: string, _handler: unknown) => {
       console.log(`IPC handler registered: ${channel}`)
     })
   }
