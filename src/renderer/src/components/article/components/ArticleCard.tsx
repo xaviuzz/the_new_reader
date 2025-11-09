@@ -23,7 +23,19 @@ export function ArticleCard({ article }: ArticleCardProps): React.JSX.Element {
   const sanitizedHtml = sanitizeHtml(article.description)
 
   return (
-    <article className="card bg-base-100 border border-base-300 hover:border-primary cursor-pointer transition-colors">
+    <article className="card bg-base-100 border border-base-300 hover:border-primary cursor-pointer transition-colors overflow-hidden">
+      {article.thumbnail && (
+        <figure className="relative w-full aspect-video bg-base-200">
+          <img
+            src={article.thumbnail}
+            alt={article.title}
+            className="w-full h-full object-cover"
+            onError={(e): void => {
+              e.currentTarget.style.display = 'none'
+            }}
+          />
+        </figure>
+      )}
       <div className="card-body">
         <h3 className="card-title text-lg line-clamp-2">{article.title}</h3>
         <div
