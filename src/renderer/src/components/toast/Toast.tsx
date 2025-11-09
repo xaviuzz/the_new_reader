@@ -10,7 +10,13 @@ export interface ToastProps {
   autoCloseDuration?: number
 }
 
-export function Toast({ id, message, type, onClose, autoCloseDuration = 4000 }: ToastProps): React.JSX.Element {
+export function Toast({
+  id,
+  message,
+  type,
+  onClose,
+  autoCloseDuration = 4000
+}: ToastProps): React.JSX.Element {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose(id)

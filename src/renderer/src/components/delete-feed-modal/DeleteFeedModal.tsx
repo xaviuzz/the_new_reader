@@ -11,7 +11,12 @@ export interface DeleteFeedModalProps {
   onDelete: (feed: Feed) => Promise<void>
 }
 
-export function DeleteFeedModal({ isOpen, feed, onClose, onDelete }: DeleteFeedModalProps): React.JSX.Element {
+export function DeleteFeedModal({
+  isOpen,
+  feed,
+  onClose,
+  onDelete
+}: DeleteFeedModalProps): React.JSX.Element {
   const [isDeleting, setIsDeleting] = useState(false)
 
   if (!isOpen || !feed) {

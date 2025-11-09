@@ -84,9 +84,7 @@ describe('AddFeedModal', () => {
         }
       })
       this.onClose = vi.fn()
-      render(
-        <AddFeedModal isOpen={isOpen} onClose={this.onClose} onAddFeed={this.onAddFeed} />
-      )
+      render(<AddFeedModal isOpen={isOpen} onClose={this.onClose} onAddFeed={this.onAddFeed} />)
     }
 
     getModalBox(): HTMLElement | null {

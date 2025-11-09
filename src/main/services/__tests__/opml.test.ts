@@ -60,9 +60,7 @@ describe('OPML Service', () => {
 
   describe('writeOpmlFile', () => {
     it('should create valid OPML file with feeds', () => {
-      const feeds: Feed[] = [
-        new Feed('Test Feed', 'https://example.com/feed.xml')
-      ]
+      const feeds: Feed[] = [new Feed('Test Feed', 'https://example.com/feed.xml')]
 
       opmlService.writeOpmlFile(feeds)
 
@@ -135,7 +133,9 @@ describe('OPML Service', () => {
       opmlService.addFeed(feed1)
 
       expect(() => opmlService.addFeed(feed2)).toThrow(FeedAlreadyExistsError)
-      expect(() => opmlService.addFeed(feed2)).toThrow('Feed already exists: https://example.com/feed.xml')
+      expect(() => opmlService.addFeed(feed2)).toThrow(
+        'Feed already exists: https://example.com/feed.xml'
+      )
 
       const feeds = opmlService.readOpmlFile()
       expect(feeds).toHaveLength(1)

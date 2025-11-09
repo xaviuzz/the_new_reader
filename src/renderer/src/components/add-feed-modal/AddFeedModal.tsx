@@ -9,11 +9,7 @@ export interface AddFeedModalProps {
   onAddFeed: (url: string) => Promise<void>
 }
 
-export function AddFeedModal({
-  isOpen,
-  onClose,
-  onAddFeed
-}: AddFeedModalProps): React.JSX.Element {
+export function AddFeedModal({ isOpen, onClose, onAddFeed }: AddFeedModalProps): React.JSX.Element {
   if (!isOpen) {
     return <></>
   }

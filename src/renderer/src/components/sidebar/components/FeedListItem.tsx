@@ -8,7 +8,12 @@ interface FeedListItemProps {
   onDeleteRequest?: (feed: Feed) => void
 }
 
-export function FeedListItem({ feed, isSelected, onSelect, onDeleteRequest }: FeedListItemProps): React.JSX.Element {
+export function FeedListItem({
+  feed,
+  isSelected,
+  onSelect,
+  onDeleteRequest
+}: FeedListItemProps): React.JSX.Element {
   const handleDelete = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()

@@ -9,7 +9,12 @@ interface ArticleListProps {
   onRefresh?: () => Promise<void>
 }
 
-export function ArticleList({ articles, isLoading = false, error = null, onRefresh }: ArticleListProps): React.JSX.Element {
+export function ArticleList({
+  articles,
+  isLoading = false,
+  error = null,
+  onRefresh
+}: ArticleListProps): React.JSX.Element {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleRefresh = async (): Promise<void> => {

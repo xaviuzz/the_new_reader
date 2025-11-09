@@ -1,25 +1,31 @@
 # Phase 2: Backend Foundation with Automated Testing
 
 ## Goal
+
 Build backend services and IPC handlers for RSS feed management with comprehensive vitest test coverage. All services will have unit tests, and IPC handlers will have integration tests.
 
 ## Steps
 
 ### Step 2.1: Set up vitest for Electron main process
+
 **What to build:**
+
 - Install vitest and related dependencies: `vitest`, `@vitest/ui` (optional)
 - Create `vitest.config.ts` for Node/Electron environment
 - Add test scripts to `package.json`: `"test": "vitest"`, `"test:ui": "vitest --ui"`
 - Create `src/main/services/__tests__` directory structure
 
 **Testing:**
+
 - [ ] Run `npm test` - vitest starts without errors
 - [ ] Create simple smoke test file - verify it runs and passes
 
 ---
 
 ### Step 2.2: Create OPML service with tests
+
 **What to build:**
+
 - Create `src/main/services/opml.ts`:
   - `getOpmlFilePath(baseDir: string)` - returns path to feeds.opml in given directory
   - `readOpmlFile(filePath: string)` - reads OPML or returns empty structure
@@ -32,6 +38,7 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
   - Clean up test files after each test
 
 **Testing:**
+
 - [ ] All OPML service tests pass
 - [ ] `getOpmlFilePath()` returns correct path with baseDir
 - [ ] `readOpmlFile()` creates empty structure when file missing
@@ -44,7 +51,9 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 ---
 
 ### Step 2.3: Create RSS service with tests
+
 **What to build:**
+
 - Create `src/main/services/rss.ts`:
   - `validateAndFetchFeed(url: string, parser?: Parser)` - validates URL and fetches feed metadata
   - `fetchArticles(feedUrl: string, parser?: Parser)` - fetches and parses articles
@@ -55,6 +64,7 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
   - Test article parsing with various field combinations
 
 **Testing:**
+
 - [ ] All RSS service tests pass
 - [ ] `validateAndFetchFeed()` with mocked valid RSS returns feed info
 - [ ] `validateAndFetchFeed()` with mocked Atom feed returns feed info
@@ -67,7 +77,9 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 ---
 
 ### Step 2.4: Create TypeScript types
+
 **What to build:**
+
 - Create `src/main/types/index.ts`:
   - `Feed` interface: `{ title: string, feedUrl: string }`
   - `Article` interface: `{ title: string, link: string, pubDate: Date | null, description: string, thumbnail: string | null }`
@@ -75,6 +87,7 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 - Import and use these types in OPML and RSS services
 
 **Testing:**
+
 - [ ] All existing tests still pass with typed interfaces
 - [ ] Run `npm run typecheck` - no TypeScript errors
 - [ ] IDE autocomplete works for Feed/Article/FeedInfo types
@@ -82,7 +95,9 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 ---
 
 ### Step 2.5: Set up IPC handlers with tests
+
 **What to build:**
+
 - Create `src/main/ipc/feeds.ts`:
   - `setupFeedsIpc(app: App)` - registers all feed-related IPC handlers
   - Handlers: `feeds:add`, `feeds:list`, `feeds:getArticles`
@@ -95,6 +110,7 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
   - Test success cases and error cases
 
 **Testing:**
+
 - [ ] All IPC handler tests pass
 - [ ] `feeds:add` handler adds valid feed to OPML
 - [ ] `feeds:add` handler returns error for invalid URL
@@ -107,12 +123,15 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 ---
 
 ### Step 2.6: Manual verification in DevTools
+
 **What to do:**
+
 - Start app with `npm run dev`
 - Open DevTools console
 - Manually test IPC methods to verify real-world functionality
 
 **Testing:**
+
 - [ ] Call `window.electron.ipcRenderer.invoke('feeds:list')` - returns empty array initially
 - [ ] Call `window.electron.ipcRenderer.invoke('feeds:add', 'https://feeds.bbci.co.uk/news/rss.xml')` - succeeds (uses real network)
 - [ ] Call `feeds:list` - returns BBC feed
@@ -136,4 +155,5 @@ Build backend services and IPC handlers for RSS feed management with comprehensi
 ---
 
 ## Next Phase Preview
+
 Phase 3 will build UI layout (navbar, sidebar, main area) with DaisyUI styling - no backend integration yet.

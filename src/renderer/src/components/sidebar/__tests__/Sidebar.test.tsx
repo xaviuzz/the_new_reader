@@ -62,7 +62,11 @@ describe('Sidebar', () => {
         new Feed('Dev.to', 'https://dev.to/api/articles', 'Developer community')
       ]
 
-      this.selectedFeed = isEmpty ? undefined : selectedFeedIndex !== undefined ? this.feeds[selectedFeedIndex] : undefined
+      this.selectedFeed = isEmpty
+        ? undefined
+        : selectedFeedIndex !== undefined
+          ? this.feeds[selectedFeedIndex]
+          : undefined
       this.onSelectFeed = vi.fn()
 
       const feedsToRender = isEmpty ? [] : this.feeds
