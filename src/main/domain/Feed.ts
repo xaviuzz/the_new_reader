@@ -35,11 +35,10 @@ export class Feed {
   }
 
   static isTitleMissing(title: string | undefined | null, feedUrl?: string): boolean {
-    if (!title) return true
-    const trimmed = title.trim()
-    if (!trimmed) return true
-    if (trimmed === 'Untitled Feed') return true
-    if (feedUrl && trimmed === feedUrl) return true
-    return false
+    const trimmed = title?.trim()
+    const isEmpty = !trimmed
+    const isPlaceholder = trimmed === 'Untitled Feed'
+    const isUrl = trimmed === feedUrl
+    return isEmpty || isPlaceholder || isUrl
   }
 }
