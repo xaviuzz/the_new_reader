@@ -2,6 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { Feed, Article } from '../main/domain'
 
+export interface UpdateResult {
+  successful: number
+  failed: number
+  skipped: number
+}
+
 // Custom APIs for renderer
 const api = {
   addFeed: (url: string): Promise<Feed> => ipcRenderer.invoke('feeds:add', url),
@@ -11,6 +17,7 @@ const api = {
   deleteFeed: (feedUrl: string): Promise<void> => ipcRenderer.invoke('feeds:delete', feedUrl),
   refreshFeed: (feedUrl: string): Promise<Article[]> =>
     ipcRenderer.invoke('feeds:refresh', feedUrl),
+  refreshTitles: (): Promise<UpdateResult> => ipcRenderer.invoke('feeds:refreshTitles'),
   openExternalLink: (url: string): Promise<void> => ipcRenderer.invoke('app:openExternalLink', url)
 }
 

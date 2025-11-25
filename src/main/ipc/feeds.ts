@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { OpmlService } from '../services/opml'
 import { RssService } from '../services/rss'
 import { CachedRssService } from '../services/cached-rss'
+import { FeedTitleUpdater } from '../services/feed-title-updater'
 
 export function setupFeedHandlers(opmlFilePath: string, cacheDir: string): void {
   const opmlService = new OpmlService(opmlFilePath)
@@ -30,5 +31,10 @@ export function setupFeedHandlers(opmlFilePath: string, cacheDir: string): void 
   ipcMain.handle('feeds:refresh', async (_event, feedUrl: string) => {
     rssService.clearCache(feedUrl)
     return await rssService.fetchArticles(feedUrl)
+  })
+
+  ipcMain.handle('feeds:refreshTitles', async () => {
+    const updater = new FeedTitleUpdater(opmlService, baseRssService)
+    return await updater.checkAndUpdateMissingTitles()
   })
 }

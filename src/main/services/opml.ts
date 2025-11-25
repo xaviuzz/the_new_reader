@@ -124,4 +124,23 @@ export class OpmlService {
 
     this.writeOpmlFile(updatedFeeds)
   }
+
+  updateFeedTitle(feedUrl: string, newTitle: string): void {
+    if (Feed.isTitleMissing(newTitle)) {
+      return
+    }
+
+    const existingFeeds = this.readOpmlFile()
+    const feedIndex = existingFeeds.findIndex((f) => f.feedUrl === feedUrl)
+
+    if (feedIndex === -1) {
+      throw new Error(`Feed with URL ${feedUrl} not found`)
+    }
+
+    const feed = existingFeeds[feedIndex]
+    const updatedFeed = new Feed(newTitle, feed.feedUrl, feed.description)
+    existingFeeds[feedIndex] = updatedFeed
+
+    this.writeOpmlFile(existingFeeds)
+  }
 }

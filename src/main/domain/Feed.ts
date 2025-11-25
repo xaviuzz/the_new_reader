@@ -1,5 +1,5 @@
 import type { RssFeed } from '../types/rss'
-import type { OpmlOutline } from '../types/opml'
+import type { OpmlOutline } from 'opml'
 
 export class Feed {
   constructor(
@@ -32,5 +32,14 @@ export class Feed {
     }
 
     return new Feed(outline.title || outline.text || outline.xmlUrl, outline.xmlUrl, '')
+  }
+
+  static isTitleMissing(title: string | undefined | null, feedUrl?: string): boolean {
+    if (!title) return true
+    const trimmed = title.trim()
+    if (!trimmed) return true
+    if (trimmed === 'Untitled Feed') return true
+    if (feedUrl && trimmed === feedUrl) return true
+    return false
   }
 }

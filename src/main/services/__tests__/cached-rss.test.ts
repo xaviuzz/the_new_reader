@@ -121,8 +121,7 @@ describe('CachedRssService', () => {
 
     vi.advanceTimersByTime(61 * 60 * 1000)
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _newCachedService = new CachedRssService(mockRssService, cacheDir, 60)
+    new CachedRssService(mockRssService, cacheDir, 60)
 
     const files = readdirSync(cacheDir)
     expect(files.length).toBe(0)

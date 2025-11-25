@@ -4,6 +4,24 @@ import { mkdirSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { setupFeedHandlers } from './ipc/feeds'
+import { OpmlService } from './services/opml'
+import { RssService } from './services/rss'
+import { FeedTitleUpdater } from './services/feed-title-updater'
+
+async function updateMissingFeedTitles(opmlFilePath: string): Promise<void> {
+  try {
+    const opmlService = new OpmlService(opmlFilePath)
+    const rssService = new RssService()
+    const updater = new FeedTitleUpdater(opmlService, rssService)
+
+    const result = await updater.checkAndUpdateMissingTitles()
+    console.log(
+      `Feed title update: ${result.successful} updated, ${result.failed} failed, ${result.skipped} skipped`
+    )
+  } catch (error) {
+    console.error('Error updating feed titles:', error)
+  }
+}
 
 async function prefetchAllFeeds(): Promise<void> {
   // Prefetching happens asynchronously, but we skip it for now
@@ -57,6 +75,9 @@ app.whenReady().then(() => {
   // Initialize IPC handlers
   const opmlFilePath = join(app.getPath('userData'), 'feeds.opml')
   setupFeedHandlers(opmlFilePath, cacheDir)
+
+  // Update missing feed titles from RSS
+  updateMissingFeedTitles(opmlFilePath)
 
   // Register app IPC handlers
   ipcMain.handle('app:openExternalLink', async (_, url: string) => {
