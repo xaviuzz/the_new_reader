@@ -20,20 +20,6 @@ See `.claude/code-quality.md` for:
 - Type safety with external libraries
 - Error handling patterns
 
-## Git Commits
-
-- **Single-line conventional commits only** - No multi-line messages or footers
-- **Format**: `emoji type: description` (e.g., `♻️ refactor: extract theme switcher into reusable component`)
-- **Types with emojis**:
-  - ✨ feat: New features
-  - 🐛 fix: Bug fixes
-  - 📝 docs: Documentation changes
-  - ♻️ refactor: Code restructuring
-  - 🎨 style: Code formatting
-  - ⚡️ perf: Performance improvements
-  - ✅ test: Tests
-  - 🧑‍💻 chore: Tooling/maintenance
-  - 🔒 security: Security improvements
 
 ## Planning Complex Features
 
