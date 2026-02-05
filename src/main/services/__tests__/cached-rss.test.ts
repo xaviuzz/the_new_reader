@@ -18,8 +18,8 @@ class MockRssService implements IRssService {
   async fetchArticles(_feedUrl: string): Promise<Article[]> {
     this.callCount++
     return [
-      new ArticleClass('Article 1', 'https://example.com/1', new Date(), 'Description 1', null),
-      new ArticleClass('Article 2', 'https://example.com/2', new Date(), 'Description 2', null)
+      new ArticleClass('Article 1', 'https://example.com/1', new Date(), 'Description 1'),
+      new ArticleClass('Article 2', 'https://example.com/2', new Date(), 'Description 2')
     ]
   }
 }

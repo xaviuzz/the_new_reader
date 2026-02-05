@@ -5,12 +5,14 @@ import { Sidebar } from './components/sidebar'
 import { ArticleList } from './components/article'
 import { AddFeedModal } from './components/add-feed-modal'
 import { DeleteFeedModal } from './components/delete-feed-modal'
+import { ArticleReaderModal } from './components/article-reader-modal'
 import { ToastContainer, useToast } from './components/toast'
 
 function AppContent(): React.JSX.Element {
   const [feeds, setFeeds] = useState<Feed[]>([])
   const [selectedFeed, setSelectedFeed] = useState<Feed | undefined>()
   const [articles, setArticles] = useState<Article[]>([])
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [isAddFeedModalOpen, setIsAddFeedModalOpen] = useState(false)
   const [feedToDelete, setFeedToDelete] = useState<Feed | null>(null)
   const [isLoadingFeeds, setIsLoadingFeeds] = useState(false)
@@ -158,6 +160,7 @@ function AppContent(): React.JSX.Element {
           isLoading={isLoadingArticles}
           error={articlesError}
           onRefresh={selectedFeed ? () => handleRefreshFeed(selectedFeed.feedUrl) : undefined}
+          onArticleOpen={setSelectedArticle}
         />
       </div>
       <AddFeedModal
@@ -170,6 +173,11 @@ function AppContent(): React.JSX.Element {
         feed={feedToDelete}
         onClose={() => setFeedToDelete(null)}
         onDelete={handleDeleteFeed}
+      />
+      <ArticleReaderModal
+        isOpen={selectedArticle !== null}
+        article={selectedArticle}
+        onClose={() => setSelectedArticle(null)}
       />
     </div>
   )

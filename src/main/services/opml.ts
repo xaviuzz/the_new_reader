@@ -2,24 +2,40 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { Feed } from '../domain'
 import { FeedAlreadyExistsError } from '../types/errors'
-import * as opml from 'opml'
+import type { OpmlOutline } from '../types/opml'
+import { XMLParser, XMLBuilder } from 'fast-xml-parser'
 
-interface OpmlStructure {
-  opml: {
-    head?: {
-      title?: string
-      dateCreated?: string
-      ownerName?: string
-    }
-    body?: {
-      subs?: Array<{
-        text?: string
-        title?: string
-        type?: string
-        xmlUrl?: string
-        htmlUrl?: string
-      }>
-    }
+const ATTR = '@_'
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: ATTR,
+  isArray: (name: string) => name === 'outline'
+})
+
+const builder = new XMLBuilder({
+  ignoreAttributes: false,
+  attributeNamePrefix: ATTR,
+  format: true
+})
+
+function toOutline(node: Record<string, string>): OpmlOutline {
+  return {
+    text: node[`${ATTR}text`],
+    title: node[`${ATTR}title`],
+    type: node[`${ATTR}type`],
+    xmlUrl: node[`${ATTR}xmlUrl`],
+    htmlUrl: node[`${ATTR}htmlUrl`]
+  }
+}
+
+function toNode(outline: OpmlOutline): Record<string, string | undefined> {
+  return {
+    [`${ATTR}text`]: outline.text,
+    [`${ATTR}title`]: outline.title,
+    [`${ATTR}type`]: outline.type,
+    [`${ATTR}xmlUrl`]: outline.xmlUrl,
+    [`${ATTR}htmlUrl`]: outline.htmlUrl
   }
 }
 
@@ -34,57 +50,32 @@ export class OpmlService {
     this.filePath = filePath
   }
 
-  private parseOpmlSync(xmlContent: string): OpmlStructure {
-    let result: OpmlStructure | undefined
-    let error: Error | null = null
-
-    opml.parse(xmlContent, (err, parsed) => {
-      error = err
-      result = parsed
-    })
-
-    if (error) {
-      throw error
-    }
-
-    return result as OpmlStructure
-  }
-
-  private stringifyOpmlSync(opmlObject: OpmlStructure): string {
-    return (opml.stringify as unknown as (obj: OpmlStructure) => string)(opmlObject)
-  }
-
   readOpmlFile(): Feed[] {
     if (!fs.existsSync(this.filePath)) {
       return []
     }
 
     const xmlContent = fs.readFileSync(this.filePath, 'utf-8')
-    const feeds: Feed[] = []
+    const parsed = parser.parse(xmlContent)
+    const outlines: Record<string, string>[] = parsed?.opml?.body?.outline || []
 
-    const result = this.parseOpmlSync(xmlContent)
-    const outlines = result.opml?.body?.subs || []
-
-    for (const outline of outlines) {
-      const feed = Feed.fromOpmlOutline(outline)
-      if (feed) {
-        feeds.push(feed)
-      }
-    }
-
-    return feeds
+    return outlines
+      .map((node) => Feed.fromOpmlOutline(toOutline(node)))
+      .filter((feed): feed is Feed => feed !== null)
   }
 
   writeOpmlFile(feeds: Feed[]): void {
-    const opmlStructure = {
+    const opmlDocument = {
+      '?xml': { [`${ATTR}version`]: '1.0', [`${ATTR}encoding`]: 'UTF-8' },
       opml: {
+        [`${ATTR}version`]: '2.0',
         head: {
           title: 'The New Reader Feeds',
           dateCreated: new Date().toUTCString(),
           ownerName: 'The New Reader'
         },
         body: {
-          subs: feeds.map((feed) => feed.toOpmlOutline())
+          outline: feeds.map((feed) => toNode(feed.toOpmlOutline()))
         }
       }
     }
@@ -94,7 +85,7 @@ export class OpmlService {
       fs.mkdirSync(dir, { recursive: true })
     }
 
-    const xmlOutput = this.stringifyOpmlSync(opmlStructure)
+    const xmlOutput = builder.build(opmlDocument)
     fs.writeFileSync(this.filePath, xmlOutput, 'utf-8')
   }
 

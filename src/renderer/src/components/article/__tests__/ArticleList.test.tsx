@@ -61,24 +61,21 @@ describe('ArticleList', () => {
           link: 'https://example.com/article1',
           pubDate: new Date('2025-11-01'),
           description:
-            'Learn best practices for building high-performance Node.js applications with clustering and load balancing.',
-          thumbnail: null
+            'Learn best practices for building high-performance Node.js applications with clustering and load balancing.'
         },
         {
           title: 'React 19: New features and improvements',
           link: 'https://example.com/article2',
           pubDate: new Date('2025-10-31'),
           description:
-            'Explore the latest features in React 19 including improved TypeScript support and better performance optimizations.',
-          thumbnail: null
+            'Explore the latest features in React 19 including improved TypeScript support and better performance optimizations.'
         },
         {
           title: 'The future of JavaScript frameworks',
           link: 'https://example.com/article3',
           pubDate: new Date('2025-10-30'),
           description:
-            'An in-depth analysis of emerging JavaScript frameworks and their impact on modern web development.',
-          thumbnail: null
+            'An in-depth analysis of emerging JavaScript frameworks and their impact on modern web development.'
         }
       ]
 

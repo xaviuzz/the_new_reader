@@ -5,8 +5,7 @@ export class Article {
     readonly title: string,
     readonly link: string,
     readonly pubDate: Date | null,
-    readonly description: string,
-    readonly thumbnail: string | null
+    readonly description: string
   ) {}
 
   static fromRssItem(item: RssItem): Article {
@@ -14,24 +13,8 @@ export class Article {
       item.title || 'Untitled',
       item.link || '',
       item.pubDate ? new Date(item.pubDate) : null,
-      item.content || item.description || '',
-      Article.extractThumbnail(item)
+      item['content:encoded'] || item.content || item.description || ''
     )
-  }
-
-  private static extractThumbnail(item: RssItem): string | null {
-    if (item.enclosure?.url) {
-      return item.enclosure.url
-    }
-
-    if (item.content?.includes('<img')) {
-      const imgMatch = item.content.match(/<img[^>]+src=["']([^"']+)["']/)
-      if (imgMatch) {
-        return imgMatch[1]
-      }
-    }
-
-    return null
   }
 
   static compareByDateDesc(a: Article, b: Article): number {

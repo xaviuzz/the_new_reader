@@ -1,2 +1,2 @@
-export type { RssFeed, RssItem, RssEnclosure } from './rss'
+export type { RssFeed, RssItem } from './rss'
 export { Feed, Article } from '../domain'

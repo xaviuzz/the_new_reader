@@ -1,5 +1,5 @@
 import type { RssFeed } from '../types/rss'
-import type { OpmlOutline } from 'opml'
+import type { OpmlOutline } from '../types/opml'
 
 export class Feed {
   constructor(

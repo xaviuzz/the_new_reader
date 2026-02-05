@@ -26,7 +26,6 @@ A modern, lightweight RSS/Atom feed reader for the desktop built with Electron a
 1. Select a feed from the sidebar to view its articles
 2. Articles are sorted by publish date (newest first)
 3. Click an article to open it in your default browser
-4. Article thumbnails are extracted from feed content automatically
 
 ### Refreshing Feeds
 
