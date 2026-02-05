@@ -5,10 +5,9 @@ import { ArticleCardFooter } from './ArticleCardFooter'
 
 interface ArticleCardProps {
   article: Article
-  onArticleOpen?: (article: Article) => void
 }
 
-export function ArticleCard({ article, onArticleOpen }: ArticleCardProps): React.JSX.Element {
+export function ArticleCard({ article }: ArticleCardProps): React.JSX.Element {
   const handleDescriptionClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     const target = e.target as HTMLElement
     if (target.tagName === 'A' && target.hasAttribute('data-external-link')) {
@@ -25,13 +24,12 @@ export function ArticleCard({ article, onArticleOpen }: ArticleCardProps): React
 
   return (
     <article
-      className="card bg-base-100 border border-base-300 hover:border-primary cursor-pointer transition-colors overflow-hidden"
-      onClick={() => onArticleOpen?.(article)}
+      className="card bg-base-100 border border-base-300 hover:border-primary transition-colors overflow-hidden"
     >
       <div className="card-body">
-        <h3 className="card-title text-lg line-clamp-2">{article.title}</h3>
+        <h3 className="card-title text-lg">{article.title}</h3>
         <div
-          className="text-sm text-base-content opacity-70 line-clamp-3 prose prose-sm max-w-none prose-p:m-0 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:max-w-full prose-img:h-auto"
+          className="text-sm text-base-content opacity-70 prose prose-sm max-w-none prose-p:m-0 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:max-w-full prose-img:h-auto"
           onClick={handleDescriptionClick}
           dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />

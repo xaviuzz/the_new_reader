@@ -7,15 +7,13 @@ interface ArticleListProps {
   isLoading?: boolean
   error?: string | null
   onRefresh?: () => Promise<void>
-  onArticleOpen?: (article: Article) => void
 }
 
 export function ArticleList({
   articles,
   isLoading = false,
   error = null,
-  onRefresh,
-  onArticleOpen
+  onRefresh
 }: ArticleListProps): React.JSX.Element {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -84,7 +82,7 @@ export function ArticleList({
         )}
         <div className="space-y-4">
           {articles.map((article) => (
-            <ArticleCard key={article.link} article={article} onArticleOpen={onArticleOpen} />
+            <ArticleCard key={article.link} article={article} />
           ))}
         </div>
       </div>
