@@ -26,10 +26,10 @@ export function ArticleCard({ article }: ArticleCardProps): React.JSX.Element {
     <article
       className="card bg-base-100 border border-base-300 hover:border-primary transition-colors overflow-hidden"
     >
-      <div className="card-body">
+      <div className="card-body p-6">
         <h3 className="card-title text-lg">{article.title}</h3>
         <div
-          className="text-sm text-base-content opacity-70 prose prose-sm max-w-none prose-p:m-0 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:max-w-full prose-img:h-auto"
+          className="article-content text-base-content"
           onClick={handleDescriptionClick}
           dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />

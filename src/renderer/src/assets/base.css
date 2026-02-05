@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .article-content {
+    @apply text-base leading-relaxed;
+  }
+
+  .article-content p {
+    @apply my-4;
+  }
+
+  .article-content a {
+    @apply text-primary font-bold underline decoration-2 underline-offset-2;
+  }
+
+  .article-content a:hover {
+    @apply decoration-primary;
+  }
+
+  .article-content h1,
+  .article-content h2,
+  .article-content h3,
+  .article-content h4,
+  .article-content h5,
+  .article-content h6 {
+    @apply mt-6 mb-3 font-bold;
+  }
+
+  .article-content ul,
+  .article-content ol {
+    @apply my-4 ml-6;
+  }
+
+  .article-content li {
+    @apply my-1;
+  }
+
+  .article-content blockquote {
+    @apply my-4 pl-4 border-l-4 border-base-300 italic;
+  }
+
+  .article-content img {
+    @apply max-w-full h-auto;
+  }
+}
+
 /* Flexoki Light Theme */
 [data-theme='flexokilight'],
 :root:has(input.theme-controller[value='flexokilight']:checked) {
