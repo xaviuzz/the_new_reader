@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { Feed } from '../../main/domain'
+import type { Feed, Article } from '../../main/domain'
 import { Navbar } from './components/navbar'
 import { Sidebar } from './components/sidebar'
 import { ArticleList } from './components/article'

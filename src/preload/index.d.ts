@@ -10,7 +10,10 @@ declare global {
       getArticles: (feedUrl: string) => Promise<Article[]>
       deleteFeed: (feedUrl: string) => Promise<void>
       refreshFeed: (feedUrl: string) => Promise<Article[]>
+      refreshTitles: () => Promise<{ successful: number; failed: number; skipped: number }>
       openExternalLink: (url: string) => Promise<void>
+      markArticleAsRead: (link: string) => Promise<void>
+      getReadArticles: () => Promise<string[]>
     }
   }
 }

@@ -31,12 +31,14 @@ describe('IPC Feed Handlers', () => {
   describe('setupFeedHandlers', () => {
     it('should initialize without throwing', () => {
       const opmlFilePath = join(testDataDir, 'feeds.opml')
-      expect(() => setupFeedHandlers(opmlFilePath, cacheDir)).not.toThrow()
+      const readArticlesPath = join(testDataDir, 'read-articles.json')
+      expect(() => setupFeedHandlers(opmlFilePath, cacheDir, readArticlesPath)).not.toThrow()
     })
 
     it('should handle feed operations', async () => {
       const opmlFilePath = join(testDataDir, 'feeds-2.opml')
-      expect(() => setupFeedHandlers(opmlFilePath, cacheDir)).not.toThrow()
+      const readArticlesPath = join(testDataDir, 'read-articles-2.json')
+      expect(() => setupFeedHandlers(opmlFilePath, cacheDir, readArticlesPath)).not.toThrow()
     })
   })
 })

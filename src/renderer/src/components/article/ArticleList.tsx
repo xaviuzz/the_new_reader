@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { Article } from '../../../../main/domain'
 import { ArticleCard } from './components/ArticleCard'
 
@@ -16,6 +16,13 @@ export function ArticleList({
   onRefresh
 }: ArticleListProps): React.JSX.Element {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [readArticles, setReadArticles] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    window.api.getReadArticles().then((links) => {
+      setReadArticles(new Set(links))
+    })
+  }, [])
 
   const handleRefresh = async (): Promise<void> => {
     if (!onRefresh) return
@@ -25,6 +32,11 @@ export function ArticleList({
     } finally {
       setIsRefreshing(false)
     }
+  }
+
+  const handleMarkAsRead = (link: string): void => {
+    window.api.markArticleAsRead(link)
+    setReadArticles((prev) => new Set(prev).add(link))
   }
 
   if (isLoading) {
@@ -82,7 +94,12 @@ export function ArticleList({
         )}
         <div className="space-y-4">
           {articles.map((article) => (
-            <ArticleCard key={article.link} article={article} />
+            <ArticleCard
+              key={article.link}
+              article={article}
+              isRead={readArticles.has(article.link)}
+              onMarkAsRead={() => handleMarkAsRead(article.link)}
+            />
           ))}
         </div>
       </div>

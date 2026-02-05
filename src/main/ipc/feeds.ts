@@ -3,11 +3,13 @@ import { OpmlService } from '../services/opml'
 import { RssService } from '../services/rss'
 import { CachedRssService } from '../services/cached-rss'
 import { FeedTitleUpdater } from '../services/feed-title-updater'
+import { ReadArticlesStorage } from '../services/read-articles-storage'
 
-export function setupFeedHandlers(opmlFilePath: string, cacheDir: string): void {
+export function setupFeedHandlers(opmlFilePath: string, cacheDir: string, readArticlesPath: string): void {
   const opmlService = new OpmlService(opmlFilePath)
   const baseRssService = new RssService()
   const rssService = new CachedRssService(baseRssService, cacheDir, 60)
+  const readArticlesStorage = new ReadArticlesStorage(readArticlesPath)
 
   ipcMain.handle('feeds:add', async (_event, url: string) => {
     const feed = await rssService.validateAndFetchFeed(url)
@@ -36,5 +38,13 @@ export function setupFeedHandlers(opmlFilePath: string, cacheDir: string): void 
   ipcMain.handle('feeds:refreshTitles', async () => {
     const updater = new FeedTitleUpdater(opmlService, baseRssService)
     return await updater.checkAndUpdateMissingTitles()
+  })
+
+  ipcMain.handle('articles:markAsRead', async (_event, link: string) => {
+    readArticlesStorage.add(link)
+  })
+
+  ipcMain.handle('articles:getReadArticles', async () => {
+    return readArticlesStorage.getAll()
   })
 }

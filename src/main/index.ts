@@ -74,7 +74,8 @@ app.whenReady().then(() => {
 
   // Initialize IPC handlers
   const opmlFilePath = join(app.getPath('userData'), 'feeds.opml')
-  setupFeedHandlers(opmlFilePath, cacheDir)
+  const readArticlesPath = join(app.getPath('userData'), 'read-articles.json')
+  setupFeedHandlers(opmlFilePath, cacheDir, readArticlesPath)
 
   // Update missing feed titles from RSS
   updateMissingFeedTitles(opmlFilePath)
